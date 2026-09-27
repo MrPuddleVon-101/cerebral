@@ -1,0 +1,741 @@
+/* ==========================================================================
+   Cerebral — design system
+
+   Deliberate constraints, set against the house style every AI-built site
+   converges on:
+     · no border radius anywhere; corners are square
+     · no card shadows, no gradient fills, no glass, no orbs
+     · hairline rules and corner ticks instead of boxes
+     · one accent pair, and only because EEG and EMG must be distinguishable
+     · Blinker for display, JetBrains Mono for anything a machine produced
+   ========================================================================== */
+
+:root {
+  --void:        #000000;
+  --ink:         #060606;
+  --ink-2:       #0b0b0b;
+
+  --bone:        #ede9e1;
+  --bone-70:     rgba(237, 233, 225, 0.84);
+  --bone-46:     rgba(237, 233, 225, 0.62);
+  --bone-28:     rgba(237, 233, 225, 0.42);
+  --bone-14:     rgba(237, 233, 225, 0.20);
+
+  --rule:        rgba(237, 233, 225, 0.15);
+  --rule-strong: rgba(237, 233, 225, 0.32);
+
+  /* The only chromatic colours on the site. They exist because the science
+     needs two channels to be told apart, not for decoration. */
+  --eeg:         #8fc9ff;
+  --emg:         #ffa469;
+  --signal:      #bfe4ff;
+
+  --gutter:      clamp(20px, 4.2vw, 68px);
+  --maxw:        1580px;
+  --rail:        clamp(54px, 6vw, 96px);
+
+  --step--1:     clamp(0.72rem, 0.68rem + 0.18vw, 0.82rem);
+  --step-0:      clamp(0.98rem, 0.93rem + 0.24vw, 1.12rem);
+  --step-1:      clamp(1.06rem, 0.98rem + 0.40vw, 1.32rem);
+  --step-2:      clamp(1.40rem, 1.18rem + 1.05vw, 2.10rem);
+  --step-3:      clamp(1.95rem, 1.45rem + 2.40vw, 3.40rem);
+  --step-4:      clamp(2.60rem, 1.60rem + 4.60vw, 5.60rem);
+  --step-5:      clamp(3.40rem, 1.20rem + 9.80vw, 10.5rem);
+
+  --ease:        cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  background: var(--void);
+  color-scheme: dark;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--void);
+  color: var(--bone);
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  font-size: var(--step-0);
+  font-weight: 400;
+  line-height: 1.72;
+  letter-spacing: 0.006em;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+/* Lenis */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-stopped { overflow: hidden; }
+
+::selection { background: var(--bone); color: var(--void); }
+
+:focus-visible {
+  outline: 1px solid var(--signal);
+  outline-offset: 3px;
+}
+
+/* --------------------------------------------------------------- typography */
+
+h1, h2, h3, h4 {
+  margin: 0;
+  font-weight: 400;
+  line-height: 1.04;
+  letter-spacing: -0.022em;
+  text-wrap: balance;
+}
+
+h1 { font-size: var(--step-4); }
+h2 { font-size: var(--step-3); }
+h3 { font-size: var(--step-2); letter-spacing: -0.016em; }
+h4 { font-size: var(--step-1); letter-spacing: -0.008em; }
+
+p { margin: 0 0 1.15em; text-wrap: pretty; max-width: 62ch; }
+p:last-child { margin-bottom: 0; }
+
+a { color: inherit; text-decoration: none; }
+
+strong { font-weight: 600; color: var(--bone); }
+
+/* Anything a machine produced — labels, counts, identifiers, status — is set
+   in mono. Anything a person wrote is set in Blinker. */
+.mono {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: var(--step--1);
+  font-weight: 400;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  line-height: 1.5;
+}
+
+.dim   { color: var(--bone-70); }
+.dimmer{ color: var(--bone-46); }
+.faint { color: var(--bone-28); }
+
+.lede {
+  font-size: var(--step-1);
+  font-weight: 300;
+  line-height: 1.62;
+  color: var(--bone-70);
+  max-width: 54ch;
+}
+
+/* ------------------------------------------------------------------- layout */
+
+.shell {
+  width: 100%;
+  max-width: var(--maxw);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.rule {
+  height: 1px;
+  border: 0;
+  background: var(--rule);
+  margin: 0;
+}
+
+/* A section label with a leading index, e.g.  02 ——— TECHNOLOGY  */
+.section-label {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: clamp(24px, 3vw, 44px);
+}
+.section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--rule);
+}
+.section-label .idx { color: var(--bone-28); }
+
+/* ------------------------------------------------------------------- chrome */
+
+.nav {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 16px var(--gutter);
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.96) 0%,
+    rgba(0, 0, 0, 0.88) 45%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  padding-bottom: 26px;
+  backdrop-filter: blur(2px);
+  pointer-events: none;
+}
+.nav > * { pointer-events: auto; }
+
+.nav-mark { display: flex; align-items: center; gap: 12px; }
+.nav-mark img { display: block; height: 19px; width: auto; }
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: clamp(14px, 1.9vw, 30px);
+}
+.nav-links a {
+  position: relative;
+  color: var(--bone-46);
+  transition: color 0.3s var(--ease);
+}
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  left: 0; bottom: -5px;
+  width: 100%; height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s var(--ease);
+}
+.nav-links a:hover,
+.nav-links a[data-active='true'] { color: var(--bone); }
+.nav-links a:hover::after,
+.nav-links a[data-active='true']::after { transform: scaleX(1); }
+
+.nav-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--bone-46);
+  white-space: nowrap;
+}
+.pip {
+  width: 5px; height: 5px;
+  background: var(--signal);
+  box-shadow: 0 0 8px var(--signal);
+  animation: pip 2.6s var(--ease) infinite;
+}
+@keyframes pip { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+
+/* Below the desktop breakpoint the links collapse into a full-screen index. */
+.nav-toggle {
+  display: none;
+  appearance: none;
+  background: none;
+  border: 1px solid var(--rule-strong);
+  color: var(--bone);
+  font: inherit;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  padding: 6px 13px 5px;
+  cursor: pointer;
+}
+.nav-toggle:hover { background: var(--bone); color: var(--void); }
+
+.nav-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  background: var(--void);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  padding: 96px var(--gutter) 40px;
+  overflow-y: auto;
+  /* `display: flex` would override the `hidden` attribute's display:none and
+     leave an invisible sheet swallowing every click, so closed state is
+     expressed with visibility instead. */
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.35s var(--ease), visibility 0s linear 0.35s;
+}
+.nav-panel[data-open='true'] {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity 0.35s var(--ease), visibility 0s;
+}
+.nav-panel nav { display: grid; }
+.nav-panel a {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--rule);
+  font-size: var(--step-1);
+  color: var(--bone-70);
+}
+.nav-panel a[data-active='true'] { color: var(--bone); }
+.nav-panel a .idx { color: var(--bone-28); }
+.nav-panel-status {
+  margin-top: 28px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  text-transform: none;
+  letter-spacing: 0.04em;
+}
+
+@media (max-width: 900px) {
+  .nav-links { display: none; }
+  .nav-status { display: none; }
+  .nav-toggle { display: inline-block; }
+}
+@media (min-width: 901px) {
+  .nav-panel { display: none; }
+}
+
+/* ------------------------------------------------------------------- badges */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 3px 9px 2px;
+  border: 1px solid var(--rule-strong);
+  color: var(--bone-70);
+  white-space: nowrap;
+}
+.badge::before {
+  content: '';
+  width: 4px; height: 4px;
+  background: currentColor;
+}
+.badge[data-tone='live']    { color: var(--signal); border-color: rgba(191, 228, 255, 0.4); }
+.badge[data-tone='done']    { color: var(--bone); border-color: var(--rule-strong); }
+.badge[data-tone='planned'] { color: var(--bone-46); border-color: var(--rule); }
+.badge[data-tone='planned']::before { background: none; box-shadow: inset 0 0 0 1px currentColor; }
+
+/* A placeholder must never be mistakable for a result (PRD FR-14). */
+.placeholder {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 13px 0;
+  border-top: 1px solid var(--rule);
+  color: var(--bone-28);
+}
+.placeholder .tag {
+  border: 1px dashed var(--bone-28);
+  padding: 2px 7px 1px;
+  color: var(--bone-46);
+  flex: none;
+}
+
+.empty {
+  border: 1px dashed var(--rule-strong);
+  padding: clamp(22px, 3.5vw, 40px);
+  color: var(--bone-46);
+}
+
+/* -------------------------------------------------------------------- lists */
+
+/* Hairline-ruled rows, not a grid of cards. */
+.rows { border-top: 1px solid var(--rule); }
+.row {
+  display: grid;
+  gap: clamp(10px, 2vw, 32px);
+  padding: clamp(20px, 2.6vw, 34px) 0;
+  border-bottom: 1px solid var(--rule);
+  transition: background 0.45s var(--ease);
+}
+a.row:hover { background: rgba(237, 233, 225, 0.028); }
+.row-3 { grid-template-columns: 7rem minmax(0, 1fr) 11rem; align-items: start; }
+.row-2 { grid-template-columns: 9rem minmax(0, 1fr); align-items: start; }
+@media (max-width: 860px) {
+  .row-3, .row-2 { grid-template-columns: 1fr; }
+}
+
+.tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.tag-chip {
+  border: 1px solid var(--rule);
+  padding: 2px 7px 1px;
+  color: var(--bone-46);
+}
+
+/* -------------------------------------------------------------- definitions */
+
+.defs { border-top: 1px solid var(--rule); }
+.def {
+  display: grid;
+  grid-template-columns: minmax(8rem, 15rem) minmax(0, 1fr);
+  gap: clamp(12px, 2vw, 36px);
+  padding: 16px 0;
+  border-bottom: 1px solid var(--rule);
+}
+.def dt { color: var(--bone-46); }
+.def dd { margin: 0; color: var(--bone-70); }
+@media (max-width: 720px) { .def { grid-template-columns: 1fr; gap: 4px; } }
+
+/* --------------------------------------------------------------------- link */
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--bone);
+  border-bottom: 1px solid var(--rule-strong);
+  padding-bottom: 3px;
+  transition: border-color 0.35s var(--ease), gap 0.35s var(--ease);
+}
+.link:hover { border-color: var(--bone); gap: 16px; }
+.link .arrow { transition: transform 0.35s var(--ease); }
+.link:hover .arrow { transform: translateX(3px); }
+
+.link-muted { color: var(--bone-46); border-bottom-color: var(--rule); }
+.link-muted:hover { color: var(--bone); }
+
+/* ------------------------------------------------------------------ reveals */
+
+/* Visible by default; only hidden once JS has armed it (see Reveal in ui.tsx),
+   so no section can be left blank by a script failure. */
+.reveal { transition: opacity 0.9s var(--ease), transform 0.9s var(--ease); }
+.reveal[data-reveal='hidden'] { opacity: 0; transform: translateY(18px); }
+
+/* ------------------------------------------------------------------ sundry */
+
+.page-top { padding-top: clamp(112px, 15vh, 190px); }
+.stack-s > * + * { margin-top: clamp(10px, 1.2vw, 16px); }
+.stack-m > * + * { margin-top: clamp(20px, 2.6vw, 36px); }
+.stack-l > * + * { margin-top: clamp(44px, 7vw, 108px); }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip-path: inset(50%); white-space: nowrap; border: 0;
+}
+
+.skip-link {
+  position: fixed; top: 8px; left: 8px; z-index: 200;
+  padding: 10px 16px;
+  background: var(--bone); color: var(--void);
+  transform: translateY(-160%);
+  transition: transform 0.25s var(--ease);
+}
+.skip-link:focus { transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .reveal, .reveal[data-reveal='hidden'] { opacity: 1; transform: none; }
+}
+
+/* ==========================================================================
+   Homepage journey
+   ========================================================================== */
+
+.journey { position: relative; z-index: 1; }
+
+/* Each beat occupies more than a screen so the 3D has room to move between
+   them; the copy is pinned to the middle of its own stretch. */
+.act {
+  position: relative;
+  height: 172svh;
+}
+.act:first-child { height: 192svh; }
+.act:last-child  { height: 215svh; }
+
+.act-pin {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  display: flex;
+  align-items: center;
+  padding-left: calc(var(--rail) + var(--gutter) * 0.35);
+  padding-right: var(--gutter);
+  pointer-events: none;
+}
+
+.act-body {
+  position: relative;
+  pointer-events: auto;
+  width: min(43ch, 46vw);
+  will-change: opacity, transform;
+}
+
+/* The camera pushes in close during several beats, so the copy needs a floor
+   under it. A soft directional falloff from the copy's own edge — invisible as
+   a shape, but it keeps body text at readable contrast over the cortex. */
+.act-pin::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0.92) 0%,
+    rgba(0, 0, 0, 0.86) 22%,
+    rgba(0, 0, 0, 0.60) 40%,
+    rgba(0, 0, 0, 0) 62%
+  );
+}
+.act[data-side='right'] .act-pin::before {
+  background: linear-gradient(
+    to left,
+    rgba(0, 0, 0, 0.92) 0%,
+    rgba(0, 0, 0, 0.86) 22%,
+    rgba(0, 0, 0, 0.60) 40%,
+    rgba(0, 0, 0, 0) 62%
+  );
+}
+/* The hero has the subject well clear of the copy, so it needs less. */
+.act--hero .act-pin::before {
+  background: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0.88) 0%,
+    rgba(0, 0, 0, 0.70) 26%,
+    rgba(0, 0, 0, 0) 54%
+  );
+}
+
+/* Alternate which side of the frame the copy sits on, and how high it sits, so
+   no two beats are composed the same way. */
+.act[data-side='right'] .act-pin { justify-content: flex-end; }
+.act[data-align='start'] .act-body { align-self: flex-start; margin-top: clamp(96px, 15vh, 175px); }
+.act[data-align='end']   .act-body { align-self: flex-end;   margin-bottom: clamp(72px, 12vh, 145px); }
+
+.act-index {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--bone-28);
+  margin-bottom: 18px;
+}
+.act-index .bar { width: 26px; height: 1px; background: var(--rule-strong); }
+
+.act-heading {
+  font-size: var(--step-2);
+  font-weight: 600;
+  line-height: 1.14;
+  letter-spacing: -0.022em;
+  margin-bottom: clamp(16px, 2vw, 24px);
+}
+.act-body p {
+  font-size: var(--step-0);
+  line-height: 1.74;
+  color: var(--bone-70);
+  max-width: 40ch;
+  margin-bottom: 1em;
+}
+
+/* The hero beat is set larger than the rest. */
+.act--hero .act-body { width: min(50ch, 56vw); }
+.act--hero .act-heading {
+  font-size: var(--step-5);
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  line-height: 0.88;
+  margin-bottom: clamp(20px, 2.6vw, 32px);
+}
+.act--hero .act-body p { font-size: var(--step-1); line-height: 1.6; max-width: 40ch; }
+
+/* Machine-readable annotation block beside the copy. */
+.readout {
+  display: grid;
+  gap: 5px;
+  margin-top: clamp(20px, 2.6vw, 30px);
+  border-top: 1px solid var(--rule);
+  padding-top: 14px;
+}
+.readout-line {
+  display: grid;
+  grid-template-columns: 11rem minmax(0, 1fr);
+  gap: 14px;
+}
+.readout-line dt { color: var(--bone-28); }
+.readout-line dd { margin: 0; color: var(--bone-70); }
+@media (max-width: 560px) {
+  .readout-line { grid-template-columns: 8rem minmax(0, 1fr); gap: 8px; }
+}
+
+/* Left rail: the table of contents for the journey. */
+.rail-index {
+  position: fixed;
+  left: 0; top: 0;
+  z-index: 40;
+  width: var(--rail);
+  height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 13px;
+  pointer-events: none;
+}
+.rail-index span {
+  color: var(--bone-14);
+  font-size: var(--step--1);
+  font-family: var(--font-mono), monospace;
+  letter-spacing: 0.1em;
+  transition: color 0.5s var(--ease), transform 0.5s var(--ease);
+}
+.rail-index span[data-on='true'] { color: var(--bone); transform: scale(1.06); }
+
+/* Scroll progress, drawn as a hairline down the right edge. */
+.meter {
+  position: fixed;
+  right: calc(var(--gutter) * 0.5);
+  top: 18vh;
+  bottom: 18vh;
+  width: 1px;
+  background: var(--rule);
+  z-index: 40;
+  pointer-events: none;
+}
+.meter i {
+  position: absolute;
+  inset: 0 0 auto 0;
+  display: block;
+  background: var(--bone);
+  transform-origin: top;
+  height: 100%;
+  transform: scaleY(0);
+}
+@media (max-width: 900px) {
+  .rail-index, .meter { display: none; }
+  .act-pin {
+    padding-left: var(--gutter);
+    justify-content: flex-start !important;
+    align-items: flex-start;
+  }
+  .act-pin::before,
+  .act[data-side='right'] .act-pin::before,
+  .act--hero .act-pin::before {
+    background: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.94) 0%,
+      rgba(0, 0, 0, 0.88) 42%,
+      rgba(0, 0, 0, 0.35) 66%,
+      rgba(0, 0, 0, 0) 84%
+    );
+  }
+  /* The 3D drops below the copy on narrow screens rather than sitting behind it. */
+  .act-body,
+  .act--hero .act-body,
+  .act[data-align='start'] .act-body,
+  .act[data-align='end'] .act-body {
+    width: 100%;
+    max-width: 46ch;
+    align-self: flex-start;
+    margin: clamp(92px, 15vh, 130px) 0 0;
+  }
+  .act--hero .act-heading { font-size: var(--step-4); }
+}
+
+/* Scroll cue on the hero. */
+.cue {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(22px, 4vh, 48px);
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  color: var(--bone-28);
+}
+.cue .track { width: 1px; height: 46px; background: var(--rule-strong); overflow: hidden; }
+.cue .track::after {
+  content: '';
+  display: block;
+  width: 1px; height: 14px;
+  background: var(--bone);
+  animation: cue 2.4s var(--ease) infinite;
+}
+@keyframes cue {
+  0%   { transform: translateY(-16px); opacity: 0; }
+  35%  { opacity: 1; }
+  100% { transform: translateY(46px); opacity: 0; }
+}
+
+/* Everything after the journey sits on solid black over the canvas. */
+.after-journey {
+  position: relative;
+  z-index: 2;
+  background: var(--void);
+}
+
+@media (max-width: 900px) {
+  .home-split { grid-template-columns: 1fr !important; }
+}
+
+/* ---------------------------------------------------------------- filters */
+
+.filter {
+  appearance: none;
+  background: none;
+  border: 1px solid var(--rule);
+  color: var(--bone-46);
+  font: inherit;
+  padding: 5px 11px 4px;
+  cursor: pointer;
+  transition: color 0.3s var(--ease), border-color 0.3s var(--ease);
+}
+.filter:hover { color: var(--bone); border-color: var(--rule-strong); }
+.filter[data-on='true'] { color: var(--void); background: var(--bone); border-color: var(--bone); }
+
+/* ==========================================================================
+   Cursor light
+   ========================================================================== */
+
+.cursor-glow {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  contain: strict;
+}
+
+.cursor-glow-halo,
+.cursor-glow-core {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.6s var(--ease);
+  will-change: transform;
+}
+
+/* Large, slow, barely there — it lifts the page rather than announcing itself. */
+.cursor-glow-halo {
+  width: 620px;
+  height: 620px;
+  background: radial-gradient(
+    circle closest-side,
+    rgba(191, 228, 255, 0.145) 0%,
+    rgba(160, 200, 240, 0.078) 32%,
+    rgba(120, 160, 210, 0.026) 58%,
+    transparent 76%
+  );
+}
+
+/* Small, quick, and slightly warmer, so the cursor has a bright centre. */
+.cursor-glow-core {
+  width: 170px;
+  height: 170px;
+  background: radial-gradient(
+    circle closest-side,
+    rgba(237, 233, 225, 0.185) 0%,
+    rgba(191, 228, 255, 0.095) 40%,
+    transparent 72%
+  );
+}
+
+@media (pointer: coarse) {
+  .cursor-glow { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cursor-glow { display: none; }
+}
