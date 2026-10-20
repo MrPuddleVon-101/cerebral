@@ -26,7 +26,7 @@ export async function generateMetadata(
 /** Reusable block so every study page has the same shape (PRD §5.2). */
 function Block({ index, label, children }: { index: string; label: string; children: React.ReactNode }) {
   return (
-    <section style={{ paddingBlock: 'clamp(34px, 4.5vw, 66px)' }}>
+    <section style={{ paddingBlock: 'clamp(26px, 3.4vw, 48px)' }}>
       <SectionLabel index={index}>{label}</SectionLabel>
       {children}
     </section>

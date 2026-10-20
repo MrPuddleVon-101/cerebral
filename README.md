@@ -21,9 +21,24 @@ npm run typecheck
 deploys to GitHub Pages, Netlify, Vercel or any static host. `public/.nojekyll`
 is present so GitHub Pages serves the `_next` directory.
 
-If you deploy to a GitHub **project** page (`user.github.io/cerebral`) rather
-than a user page or custom domain, set `basePath` and `assetPrefix` to
-`'/cerebral'` in `next.config.mjs`.
+### Deployment
+
+`.github/workflows/deploy.yml` builds and publishes to GitHub Pages on every
+push to `main`. A project site is served from `/<repo>`, so the workflow passes
+`NEXT_PUBLIC_BASE_PATH` (from `actions/configure-pages`) into the build, and
+every asset URL in the codebase goes through `asset()` in `lib/asset.ts` to
+pick it up. `next/link` applies the base path itself; in the App Router
+`next/image`, raw `<img>` and `new Image()` do not, which is why the helper
+exists.
+
+To preview the deployed shape locally:
+
+```bash
+NEXT_PUBLIC_BASE_PATH=/cerebral npm run build
+```
+
+A custom domain or a user site needs no change: leave the variable unset and
+everything serves from the root.
 
 ---
 

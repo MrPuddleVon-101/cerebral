@@ -16,13 +16,13 @@
   --ink-2:       #0b0b0b;
 
   --bone:        #ede9e1;
-  --bone-70:     rgba(237, 233, 225, 0.84);
-  --bone-46:     rgba(237, 233, 225, 0.62);
-  --bone-28:     rgba(237, 233, 225, 0.42);
-  --bone-14:     rgba(237, 233, 225, 0.20);
+  --bone-70:     rgba(237, 233, 225, 0.88);
+  --bone-46:     rgba(237, 233, 225, 0.72);
+  --bone-28:     rgba(237, 233, 225, 0.62);
+  --bone-14:     rgba(237, 233, 225, 0.28);
 
-  --rule:        rgba(237, 233, 225, 0.15);
-  --rule-strong: rgba(237, 233, 225, 0.32);
+  --rule:        rgba(237, 233, 225, 0.17);
+  --rule-strong: rgba(237, 233, 225, 0.34);
 
   /* The only chromatic colours on the site. They exist because the science
      needs two channels to be told apart, not for decoration. */
@@ -34,13 +34,13 @@
   --maxw:        1580px;
   --rail:        clamp(54px, 6vw, 96px);
 
-  --step--1:     clamp(0.72rem, 0.68rem + 0.18vw, 0.82rem);
-  --step-0:      clamp(0.98rem, 0.93rem + 0.24vw, 1.12rem);
+  --step--1:     clamp(0.84rem, 0.80rem + 0.20vw, 0.96rem);
+  --step-0:      clamp(1.02rem, 0.97rem + 0.26vw, 1.18rem);
   --step-1:      clamp(1.06rem, 0.98rem + 0.40vw, 1.32rem);
   --step-2:      clamp(1.40rem, 1.18rem + 1.05vw, 2.10rem);
   --step-3:      clamp(1.95rem, 1.45rem + 2.40vw, 3.40rem);
   --step-4:      clamp(2.60rem, 1.60rem + 4.60vw, 5.60rem);
-  --step-5:      clamp(3.40rem, 1.20rem + 9.80vw, 10.5rem);
+  --step-5:      clamp(3.00rem, 1.10rem + 8.20vw, 8.60rem);
 
   --ease:        cubic-bezier(0.22, 0.61, 0.36, 1);
 }
@@ -400,10 +400,10 @@ a.row:hover { background: rgba(237, 233, 225, 0.028); }
 
 /* ------------------------------------------------------------------ sundry */
 
-.page-top { padding-top: clamp(112px, 15vh, 190px); }
+.page-top { padding-top: clamp(92px, 11vh, 148px); }
 .stack-s > * + * { margin-top: clamp(10px, 1.2vw, 16px); }
 .stack-m > * + * { margin-top: clamp(20px, 2.6vw, 36px); }
-.stack-l > * + * { margin-top: clamp(44px, 7vw, 108px); }
+.stack-l > * + * { margin-top: clamp(32px, 5vw, 76px); }
 
 .sr-only {
   position: absolute; width: 1px; height: 1px;
@@ -442,8 +442,8 @@ a.row:hover { background: rgba(237, 233, 225, 0.028); }
   position: relative;
   height: 172svh;
 }
-.act:first-child { height: 192svh; }
-.act:last-child  { height: 215svh; }
+.act--hero { height: 192svh; }
+.act--last { height: 215svh; }
 
 .act-pin {
   position: sticky;
@@ -502,7 +502,7 @@ a.row:hover { background: rgba(237, 233, 225, 0.028); }
    no two beats are composed the same way. */
 .act[data-side='right'] .act-pin { justify-content: flex-end; }
 .act[data-align='start'] .act-body { align-self: flex-start; margin-top: clamp(96px, 15vh, 175px); }
-.act[data-align='end']   .act-body { align-self: flex-end;   margin-bottom: clamp(72px, 12vh, 145px); }
+.act[data-align='end']   .act-body { align-self: flex-end;   margin-bottom: clamp(52px, 8vh, 104px); }
 
 .act-index {
   display: flex;
@@ -519,25 +519,62 @@ a.row:hover { background: rgba(237, 233, 225, 0.028); }
   line-height: 1.14;
   letter-spacing: -0.022em;
   margin-bottom: clamp(16px, 2vw, 24px);
+  /* Wiped in from the left by the scroll loop, like a marker stroke. */
+  clip-path: inset(-0.4em calc((1 - var(--w, 1)) * 104% - 0.5em) -0.4em -0.5em);
 }
+
+/* Children of a beat animate in on their own offsets. The loop writes these
+   as compositor properties only. */
+.act-body > * { will-change: opacity, transform; }
+
+/* Inverted headings. Cream block, black type, one block per line. It separates
+   the heading from the body copy far harder than a weight change can, and it
+   holds up over a bright passage of the 3D behind it. */
+.mark {
+  display: inline;
+  background: var(--bone);
+  color: var(--void);
+  padding: 0.10em 0.30em 0.14em;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  letter-spacing: -0.024em;
+}
+.act-heading .mark { line-height: 1.52; }
+/* The block's own padding supplies the optical left margin. */
+.act-heading { margin-left: -0.30em; }
+.act[data-side='right'] .act-heading { margin-left: -0.30em; }
 .act-body p {
   font-size: var(--step-0);
   line-height: 1.74;
   color: var(--bone-70);
-  max-width: 40ch;
+  max-width: 42ch;
   margin-bottom: 1em;
 }
 
+/* The hook. Large enough to be read before anything else on the page, and
+   deliberately a question rather than a claim. */
+.act-subheading {
+  font-size: clamp(1.18rem, 0.98rem + 0.88vw, 1.78rem) !important;
+  font-weight: 300;
+  line-height: 1.32;
+  letter-spacing: -0.016em;
+  color: var(--bone) !important;
+  max-width: 26ch !important;
+  margin-bottom: clamp(16px, 1.9vw, 24px) !important;
+  text-wrap: balance;
+}
+
 /* The hero beat is set larger than the rest. */
-.act--hero .act-body { width: min(50ch, 56vw); }
+.act--hero .act-body { width: min(52ch, 58vw); }
 .act--hero .act-heading {
+  margin-top: 0;
   font-size: var(--step-5);
-  font-weight: 800;
-  letter-spacing: -0.045em;
-  line-height: 0.88;
+  font-weight: 400;
+  letter-spacing: -0.038em;
+  line-height: 0.80;
   margin-bottom: clamp(20px, 2.6vw, 32px);
 }
-.act--hero .act-body p { font-size: var(--step-1); line-height: 1.6; max-width: 40ch; }
+.act--hero .act-body p { font-size: var(--step-1); line-height: 1.58; max-width: 40ch; }
 
 /* Machine-readable annotation block beside the copy. */
 .readout {
@@ -629,7 +666,8 @@ a.row:hover { background: rgba(237, 233, 225, 0.028); }
     align-self: flex-start;
     margin: clamp(92px, 15vh, 130px) 0 0;
   }
-  .act--hero .act-heading { font-size: var(--step-4); }
+  .act--hero .act-heading {
+  margin-top: 0; font-size: var(--step-4); }
 }
 
 /* Scroll cue on the hero. */
@@ -695,40 +733,56 @@ a.row:hover { background: rgba(237, 233, 225, 0.028); }
   pointer-events: none;
   mix-blend-mode: screen;
   contain: strict;
+  --glow-scale: 1;
+  --glow-boost: 1;
+}
+/* Over anything clickable the light swells and brightens. */
+.cursor-glow[data-hot='true'] {
+  --glow-scale: 1.34;
+  --glow-boost: 1.5;
 }
 
+/* Outer layer carries position only, so the per-frame transform never fights
+   the hover transition on the inner layer. */
 .cursor-glow-halo,
 .cursor-glow-core {
   position: absolute;
   top: 0;
   left: 0;
-  border-radius: 50%;
   opacity: 0;
-  transition: opacity 0.6s var(--ease);
+  transition: opacity 0.7s var(--ease);
   will-change: transform;
 }
+.cursor-glow-halo > i,
+.cursor-glow-core > i {
+  display: block;
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  transform: scale(var(--glow-scale));
+  opacity: var(--glow-boost);
+  transition: transform 0.55s var(--ease), opacity 0.55s var(--ease);
+}
 
-/* Large, slow, barely there — it lifts the page rather than announcing itself. */
-.cursor-glow-halo {
-  width: 620px;
-  height: 620px;
+/* Large, slow and cool: the ambient lift. */
+.cursor-glow-halo { width: 700px; height: 700px; }
+.cursor-glow-halo > i {
   background: radial-gradient(
     circle closest-side,
-    rgba(191, 228, 255, 0.145) 0%,
-    rgba(160, 200, 240, 0.078) 32%,
-    rgba(120, 160, 210, 0.026) 58%,
+    rgba(191, 228, 255, 0.23) 0%,
+    rgba(160, 200, 240, 0.13) 30%,
+    rgba(120, 160, 210, 0.047) 56%,
     transparent 76%
   );
 }
 
-/* Small, quick, and slightly warmer, so the cursor has a bright centre. */
-.cursor-glow-core {
-  width: 170px;
-  height: 170px;
+/* Small and warm: the bright centre that reads as the cursor itself. */
+.cursor-glow-core { width: 220px; height: 220px; }
+.cursor-glow-core > i {
   background: radial-gradient(
     circle closest-side,
-    rgba(237, 233, 225, 0.185) 0%,
-    rgba(191, 228, 255, 0.095) 40%,
+    rgba(237, 233, 225, 0.32) 0%,
+    rgba(191, 228, 255, 0.16) 40%,
     transparent 72%
   );
 }
@@ -738,4 +792,219 @@ a.row:hover { background: rgba(237, 233, 225, 0.028); }
 }
 @media (prefers-reduced-motion: reduce) {
   .cursor-glow { display: none; }
+}
+
+/* ==========================================================================
+   Author portrait
+   ========================================================================== */
+
+.author-split {
+  display: grid;
+  gap: clamp(32px, 4.5vw, 72px);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  align-items: center;
+}
+
+
+.portrait-stage {
+  position: relative;
+  width: 100%;
+  max-width: 430px;
+  aspect-ratio: 582 / 704;
+  justify-self: end;
+  isolation: isolate;
+}
+
+.portrait-photo {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0;
+  transform: scale(1.015);
+  transition: opacity 1.2s var(--ease), transform 1.6s var(--ease);
+}
+.portrait-stage[data-loaded='true'] .portrait-photo {
+  opacity: 1;
+  transform: none;
+}
+
+.portrait-outline {
+  position: absolute;
+  top: -26%;
+  left: -26%;
+  width: 152%;
+  height: 152%;
+  z-index: 2;
+  display: block;
+  pointer-events: none;
+}
+
+/* The aura: a wide, low-contrast bloom behind the cutout. */
+.portrait-stage::before {
+  content: '';
+  position: absolute;
+  inset: -16%;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at 50% 42%,
+    rgba(191, 228, 255, 0.16) 0%,
+    rgba(150, 190, 235, 0.08) 34%,
+    rgba(110, 150, 200, 0.026) 56%,
+    transparent 74%
+  );
+}
+
+
+
+/* ==========================================================================
+   Founder section
+   ========================================================================== */
+
+.author-section { padding-block: clamp(52px, 7vw, 96px); }
+
+.founder-grid {
+  display: grid;
+  grid-template-columns: minmax(300px, 0.85fr) minmax(0, 1.15fr);
+  gap: clamp(28px, 4vw, 64px);
+  align-items: center;
+}
+
+.founder-portrait { justify-self: center; width: 100%; max-width: 420px; }
+
+/* The whole plate is the link. Hover lifts it slightly and warms the aura. */
+.portrait-link {
+  position: relative;
+  display: block;
+  transition: transform 0.6s var(--ease);
+}
+.portrait-link:hover { transform: translateY(-5px) scale(1.012); }
+.portrait-link:focus-visible { outline-offset: 10px; }
+
+.portrait-cue {
+  position: absolute;
+  left: 50%;
+  bottom: 4%;
+  transform: translate(-50%, 8px);
+  z-index: 4;
+  padding: 5px 12px 4px;
+  border: 1px solid var(--rule-strong);
+  background: rgba(0, 0, 0, 0.72);
+  color: var(--bone-70);
+  opacity: 0;
+  transition: opacity 0.45s var(--ease), transform 0.45s var(--ease);
+  pointer-events: none;
+  white-space: nowrap;
+}
+.portrait-link:hover .portrait-cue,
+.portrait-link:focus-visible .portrait-cue {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.founder-copy > * + * { margin-top: clamp(14px, 1.7vw, 20px); }
+.founder-name {
+  font-size: var(--step-3);
+  letter-spacing: -0.03em;
+  line-height: 1.48;
+  margin-left: -0.30em;
+}
+.founder-role { margin-top: clamp(14px, 1.8vw, 20px) !important; }
+.founder-copy p.dim { max-width: 54ch; }
+
+.founder-facts { margin-top: clamp(20px, 2.6vw, 30px) !important; }
+.founder-facts .def { padding: 12px 0; }
+.founder-facts dd { text-transform: none; letter-spacing: 0.02em; }
+
+.founder-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(16px, 2.4vw, 32px);
+  margin-top: clamp(22px, 2.8vw, 32px) !important;
+}
+
+@media (max-width: 980px) {
+  .founder-grid { grid-template-columns: 1fr; }
+  .founder-portrait { max-width: 340px; justify-self: start; }
+  .founder-name { margin-left: -0.30em; }
+}
+
+/* ==========================================================================
+   Footer call to action
+   ========================================================================== */
+
+.footer-cta {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: clamp(28px, 4vw, 72px);
+  align-items: end;
+  padding-block: clamp(40px, 5.4vw, 74px);
+}
+.footer-cta-head {
+  font-size: var(--step-2);
+  font-weight: 400;
+  max-width: 17ch;
+  letter-spacing: -0.02em;
+}
+.footer-cta-side { display: grid; gap: clamp(18px, 2.4vw, 28px); justify-items: start; }
+.footer-cta-side p { max-width: 46ch; margin: 0; }
+
+@media (max-width: 860px) {
+  .footer-cta { grid-template-columns: 1fr; align-items: start; }
+}
+
+/* ---------------------------------------------------------- planned note */
+
+.planned-note {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin: 0;
+  max-width: 62ch;
+  color: var(--bone-46);
+  text-transform: none;
+  letter-spacing: 0.04em;
+  line-height: 1.6;
+}
+.planned-note .tag {
+  flex: none;
+  border: 1px dashed var(--bone-28);
+  padding: 2px 8px 1px;
+  color: var(--bone-70);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.86em;
+}
+
+/* ---------------------------------------------------------- footer layout */
+
+.footer-cols {
+  display: grid;
+  gap: clamp(26px, 3.4vw, 56px);
+  grid-template-columns: minmax(0, 1.5fr) repeat(3, minmax(0, 1fr));
+  align-items: start;
+}
+
+/* Nine section links stacked in one column made the footer row tall enough to
+   leave a hole under the three short columns beside it. */
+.footer-sections,
+.footer-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 7px 24px;
+}
+.footer-sections { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+@media (max-width: 860px) {
+  .footer-cols { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 520px) {
+  .footer-cols { grid-template-columns: 1fr; }
+  .footer-sections { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

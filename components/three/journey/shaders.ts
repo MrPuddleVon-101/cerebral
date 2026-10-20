@@ -27,6 +27,7 @@ export const brainVert = /* glsl */ `
   uniform float uFogNear;    // view depth where the fade begins
   uniform float uFogFar;     // view depth where the fade bottoms out
   uniform vec4  uPulses[4];  // xyz = origin on the cortex, w = shell radius
+  uniform vec4  uTouch;      // xyz = cursor point on the cortex, w = strength
 
   attribute vec3  aScatter;
   attribute float aSeed;
@@ -44,8 +45,14 @@ export const brainVert = /* glsl */ `
     // Slow idle breathing so the cortex never looks frozen.
     pos += normal * (sin(uTime * 0.6 + aSeed * 43.0) * 0.0055);
 
-    // Dissolve outward when an act hands the stage to another object.
-    pos += normal * uDissolve * (0.25 + aSeed * 1.9);
+    // Dissolve outward when an act hands the stage to another object. The
+    // per-point offset makes it break up as a travelling wave.
+    float dis = clamp(uDissolve * 1.38 - aSeed * 0.36, 0.0, 1.0);
+    dis = dis * dis * (3.0 - 2.0 * dis);
+    pos += normal * dis * (0.30 + aSeed * 1.75);
+
+    float touchLift = (1.0 - sstep(0.0, 0.58, distance(home, uTouch.xyz))) * uTouch.w;
+    pos += normal * touchLift * 0.048;
 
     // Travelling activation wavefronts — expanding shells from a few origins.
     float glow = 0.0;
@@ -55,7 +62,11 @@ export const brainVert = /* glsl */ `
       float d = distance(home, uPulses[i].xyz);
       glow += (1.0 - sstep(0.0, 0.17, abs(d - r))) * (1.0 - sstep(0.5, 2.4, r));
     }
-    glow = min(glow, 1.6);
+    // The cortex answers the cursor: a local bloom, and the surface lifts
+    // very slightly toward it.
+    float touch = (1.0 - sstep(0.0, 0.58, distance(home, uTouch.xyz))) * uTouch.w;
+    glow += touch * 1.35;
+    glow = min(glow, 2.3);
 
     vec4 mv = modelViewMatrix * vec4(pos, 1.0);
 
@@ -70,14 +81,14 @@ export const brainVert = /* glsl */ `
     float lam  = max(dot(nrmView, KEY), 0.0);
     float fill = max(dot(nrmView, FILL), 0.0);
     float rim  = pow(1.0 - max(dot(nrmView, viewDir), 0.0), 2.1);
-    float ao   = pow(aFold, 1.80);           // sulci sit in their own shadow
+    float ao   = pow(aFold, 2.10);           // sulci sit in their own shadow
 
     // Depth fade: without it the far surface is as bright as the near one and
     // the cortex reads as a translucent cloud instead of a solid object.
     float fog = 1.0 - smoothstep(uFogNear, uFogFar, -mv.z) * 0.78;
 
     vShade = ((0.085 + 1.22 * lam + 0.30 * fill) * (0.17 + 0.83 * ao)
-              + 0.42 * rim * ao) * aDepth * fog * uExposure;
+              + 0.30 * rim * ao) * aDepth * fog * uExposure;
     vGlow  = glow * aDepth * mix(0.35, 1.0, fog);
     vAlpha = uOpacity * mix(0.45, 1.0, aDepth) * clamp(uAssemble * 1.4, 0.0, 1.0)
              * mix(0.55, 1.0, fog);
@@ -336,8 +347,8 @@ export const deviceVert = /* glsl */ `
 
     vec4 mv = modelViewMatrix * vec4(pos, 1.0);
     gl_Position = projectionMatrix * mv;
-    gl_PointSize = clamp(uSize * (0.7 + aSeed * 0.5 + aNode * (0.9 + beat * 0.8))
-                 * uScale / max(0.12, -mv.z), 0.0, 15.0);
+    gl_PointSize = clamp(uSize * (0.7 + aSeed * 0.5 + aNode * (0.55 + beat * 0.45))
+                 * uScale / max(0.12, -mv.z), 0.0, 11.0);
   }
 `;
 
@@ -351,9 +362,9 @@ export const deviceFrag = /* glsl */ `
     vec2 c = gl_PointCoord - 0.5;
     float d2 = dot(c, c);
     if (d2 > 0.25) discard;
-    float a = smoothstep(0.25, 0.02, d2) * vAlpha * (0.42 + vNode * 0.5);
+    float a = smoothstep(0.25, 0.02, d2) * vAlpha * (0.40 + vNode * 0.32);
     if (a < 0.01) discard;
-    gl_FragColor = vec4(mix(uBone * 0.78, uSignal, vNode) * (0.75 + vNode * 0.85), a);
+    gl_FragColor = vec4(mix(uBone * 0.72, uSignal, vNode * 0.8) * (0.62 + vNode * 0.45), a);
   }
 `;
 

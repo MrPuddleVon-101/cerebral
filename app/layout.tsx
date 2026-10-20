@@ -5,6 +5,7 @@ import { CursorGlow } from '@/components/site/CursorGlow';
 import { Footer } from '@/components/site/Footer';
 import { Nav } from '@/components/site/Nav';
 import { SmoothScroll } from '@/components/site/SmoothScroll';
+import { asset } from '@/lib/asset';
 import { site } from '@/content/site';
 
 import './globals.css';
@@ -42,7 +43,7 @@ export const metadata: Metadata = {
     siteName: site.name,
     title: `${site.name} — ${site.tagline}`,
     description: site.shortDescription,
-    images: [{ url: '/brand/cerebral-lockup.png', width: 1883, height: 292, alt: `${site.name} logotype` }],
+    images: [{ url: asset('/brand/cerebral-lockup.png'), width: 1883, height: 292, alt: `${site.name} logotype` }],
   },
   twitter: {
     card: 'summary_large_image',
@@ -50,8 +51,8 @@ export const metadata: Metadata = {
     description: site.shortDescription,
   },
   icons: {
-    icon: '/brand/mark-512.png',
-    apple: '/brand/apple-touch-icon.png',
+    icon: asset('/brand/mark-512.png'),
+    apple: asset('/brand/apple-touch-icon.png'),
   },
 };
 

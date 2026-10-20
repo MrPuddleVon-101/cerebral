@@ -14,7 +14,7 @@ export function PageHeader({
   meta?: React.ReactNode;
 }) {
   return (
-    <header className="shell page-top" style={{ paddingBottom: 'clamp(40px, 6vw, 88px)' }}>
+    <header className="shell page-top" style={{ paddingBottom: 'clamp(26px, 3.6vw, 54px)' }}>
       <SectionLabel index={index}>{label}</SectionLabel>
       <h1 style={{ maxWidth: '18ch' }}>{title}</h1>
       {lede ? <p className="lede" style={{ marginTop: 'clamp(20px, 2.6vw, 34px)' }}>{lede}</p> : null}

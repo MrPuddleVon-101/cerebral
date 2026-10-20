@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 export default function NotFound() {
   return (
-    <div className="shell page-top" style={{ paddingBottom: 'clamp(80px, 14vw, 200px)' }}>
+    <div className="shell page-top" style={{ paddingBottom: 'clamp(56px, 9vw, 120px)' }}>
       <p className="mono dimmer" style={{ marginBottom: 20 }}>404 — no such route</p>
       <h1 style={{ maxWidth: '16ch' }}>Nothing is recorded at this address.</h1>
       <p className="lede" style={{ marginTop: 'clamp(20px, 2.6vw, 32px)' }}>

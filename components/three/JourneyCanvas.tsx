@@ -12,11 +12,11 @@ import type { JourneyHandle } from './journey/engine';
  * the page below still reads completely (PRD §18, FR-01).
  */
 export function JourneyCanvas({
-  scrollRef,
+  progressRef,
   onReady,
 }: {
-  /** Element whose scroll extent drives the timeline. */
-  scrollRef: React.RefObject<HTMLElement | null>;
+  /** Normalised 0..1 scroll position, written by the Journey loop. */
+  progressRef: React.RefObject<number>;
   onReady?: () => void;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -28,7 +28,6 @@ export function JourneyCanvas({
     if (!canvas) return;
 
     let disposed = false;
-    let raf = 0;
     let onResize: (() => void) | null = null;
     let onVisibility: (() => void) | null = null;
 
@@ -38,20 +37,14 @@ export function JourneyCanvas({
       .then(({ createJourney }) => {
         if (disposed) return;
 
-        const handle = createJourney(canvas, { reducedMotion: reduced, onReady });
+        // The engine pulls scroll position from the ref on its own frame, so
+        // there is one rAF loop here rather than two, and no layout read.
+        const handle = createJourney(canvas, {
+          reducedMotion: reduced,
+          onReady,
+          getProgress: () => progressRef.current,
+        });
         handleRef.current = handle;
-
-        // Read scroll every frame rather than on the scroll event: with smooth
-        // scrolling the position keeps easing after the last event fires.
-        const tick = () => {
-          raf = requestAnimationFrame(tick);
-          const el = scrollRef.current;
-          if (!el) return;
-          const total = el.scrollHeight - window.innerHeight;
-          const y = -el.getBoundingClientRect().top;
-          handle.setProgress(total > 0 ? y / total : 0);
-        };
-        raf = requestAnimationFrame(tick);
 
         onResize = () => handle.resize();
         window.addEventListener('resize', onResize, { passive: true });
@@ -63,13 +56,12 @@ export function JourneyCanvas({
 
     return () => {
       disposed = true;
-      cancelAnimationFrame(raf);
       if (onResize) window.removeEventListener('resize', onResize);
       if (onVisibility) document.removeEventListener('visibilitychange', onVisibility);
       handleRef.current?.dispose();
       handleRef.current = null;
     };
-  }, [scrollRef, onReady]);
+  }, [progressRef, onReady]);
 
   if (failed) return null;
 

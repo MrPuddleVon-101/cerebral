@@ -21,7 +21,7 @@ export default function PublicationsPage() {
         lede="This page exists so the first real entry has somewhere to go. It will record publications, preprints, technical reports, posters, competitions and talks — each with its venue, status and artifacts, and each kept distinct from the others."
       />
 
-      <div className="shell" style={{ paddingBottom: 'clamp(50px, 8vw, 110px)' }}>
+      <div className="shell" style={{ paddingBottom: 'clamp(36px, 5vw, 72px)' }}>
         <hr className="rule" />
         <div style={{ paddingTop: 'clamp(36px, 5vw, 64px)' }}>
           {publications.length === 0 ? (

@@ -127,6 +127,22 @@ export function Reveal({
   );
 }
 
+/* -------------------------------------------------------- planned note ---- */
+
+/**
+ * A single line standing in for a section that has nothing in it yet. The
+ * large dashed panels this replaces made the site look like scaffolding; one
+ * labelled line says the same thing without dominating the page.
+ */
+export function PlannedNote({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="planned-note mono">
+      <span className="tag">Planned</span>
+      <span>{children}</span>
+    </p>
+  );
+}
+
 /* -------------------------------------------------------------------- empty */
 
 export function EmptyState({ title, children }: { title: string; children?: React.ReactNode }) {

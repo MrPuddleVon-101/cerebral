@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 
 import { PageHeader } from '@/components/site/PageHeader';
 import { PageShell } from '@/components/site/PageShell';
-import { SectionLabel } from '@/components/site/ui';
+import { PlannedNote, SectionLabel } from '@/components/site/ui';
 import { site } from '@/content/site';
 
 export const metadata: Metadata = {
@@ -32,10 +32,10 @@ export default function ContactPage() {
         lede="Cerebral is early enough that an outside opinion still changes the direction. If you work on any part of this — or you think a claim on this site does not hold — that is worth an email."
       />
 
-      <div className="shell" style={{ paddingBottom: 'clamp(50px, 8vw, 110px)' }}>
+      <div className="shell" style={{ paddingBottom: 'clamp(36px, 5vw, 72px)' }}>
         <hr className="rule" />
 
-        <section style={{ paddingBlock: 'clamp(40px, 5.5vw, 80px)' }}>
+        <section style={{ paddingBlock: 'clamp(30px, 4vw, 58px)' }}>
           <SectionLabel index="01">Reasons to get in touch</SectionLabel>
           <div className="rows">
             {REASONS.map(([k, d]) => (
@@ -49,7 +49,7 @@ export default function ContactPage() {
 
         <hr className="rule" />
 
-        <section style={{ paddingBlock: 'clamp(44px, 6vw, 90px)' }}>
+        <section style={{ paddingBlock: 'clamp(32px, 4.4vw, 64px)' }}>
           <SectionLabel index="02">Direct</SectionLabel>
           <p className="dim" style={{ marginBottom: 'clamp(22px, 3vw, 32px)', maxWidth: '54ch' }}>
             Email is the whole contact system for now. A form would need a backend and spam handling
@@ -66,15 +66,12 @@ export default function ContactPage() {
 
         <hr className="rule" />
 
-        <section style={{ paddingBlock: 'clamp(40px, 5.5vw, 80px)' }}>
+        <section style={{ paddingBlock: 'clamp(30px, 4vw, 58px)' }}>
           <SectionLabel index="03">Open problems</SectionLabel>
-          <div className="empty mono">
-            <p style={{ color: 'var(--bone-70)', margin: 0 }}>Coming with Study 01.</p>
-            <p className="dimmer" style={{ textTransform: 'none', letterSpacing: '0.03em', marginTop: 14, marginBottom: 0, maxWidth: '58ch' }}>
-              A contribute page listing specific unsolved research and engineering problems, so an
-              offer of help has something concrete to attach to.
-            </p>
-          </div>
+          <PlannedNote>
+            A list of specific unsolved research and engineering problems, so an offer of help has
+            something concrete to attach to. Arrives with Study 01.
+          </PlannedNote>
         </section>
       </div>
     </PageShell>

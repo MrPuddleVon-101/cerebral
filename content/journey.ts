@@ -16,8 +16,9 @@ export const journeyActs: JourneyAct[] = [
     index: '00',
     label: 'Cerebral',
     heading: 'Think Beyond.',
+    subheading: 'What if you could control technology with nothing but a thought?',
     body: [
-      'Cerebral is a research project with one question behind it. Can a brain-computer interface be made small enough that a person would actually wear one?',
+      'Cerebral is exploring whether brain\u2013computer interfaces can become small, wearable and practical enough to live around the ear.',
     ],
     readout: [
       { k: 'phase', v: 'research' },
@@ -32,12 +33,12 @@ export const journeyActs: JourneyAct[] = [
     heading: 'Your brain runs on electricity.',
     body: [
       'When you think, brain cells fire. That activity is electrical, and a faint trace of it reaches the surface of your head.',
-      'A brain-computer interface puts sensors on the skin, picks up that trace, and lets a computer react to it. Nothing goes inside you. Nothing reads your thoughts. It measures a voltage, and that is all it measures.',
+      'A brain-computer interface puts sensors on the skin, picks up that trace, and lets a computer react to it. Nothing goes inside you. It does not read your mind. It measures electrical patterns that may correspond to particular intentions or actions.',
     ],
     readout: [
       { k: 'sensors sit on', v: 'the skin' },
       { k: 'signal size', v: 'millionths of a volt' },
-      { k: 'what it reads', v: 'voltage, not thought' },
+      { k: 'what it reads', v: 'patterns, not thoughts' },
     ],
   },
   {
@@ -120,7 +121,7 @@ export const journeyActs: JourneyAct[] = [
     label: 'The device',
     heading: 'Nothing has been built yet.',
     body: [
-      'The goal is a small hook that sits around the ear. A few sensors, a chip to clean up the signal, and enough computing power to be useful without a laptop attached.',
+      'The goal is something the size of an earbud. A few sensors on the tip that touch the skin inside the ear, a chip to clean up the signal, and enough computing power to be useful on its own.',
       'The shape here is a sketch. It exists to work out what has to fit where, and how far apart the sensors can sit. No hardware has been made, and no number anywhere on this site came from a real device.',
     ],
     readout: [

@@ -37,9 +37,9 @@ interface QualitySpec {
 }
 
 const QUALITY: Record<Tier, QualitySpec> = {
-  high: { points: 138_000, wires: 1200, dprCap: 2.0, bloom: true, tracePoints: 2200 },
-  mid:  { points: 72_000,  wires: 700,  dprCap: 1.75, bloom: true, tracePoints: 1400 },
-  low:  { points: 30_000,  wires: 260,  dprCap: 1.5, bloom: false, tracePoints: 700 },
+  high: { points: 165_000, wires: 1200, dprCap: 2.0, bloom: true, tracePoints: 2200 },
+  mid:  { points: 88_000,  wires: 700,  dprCap: 1.75, bloom: true, tracePoints: 1400 },
+  low:  { points: 36_000,  wires: 260,  dprCap: 1.5, bloom: false, tracePoints: 700 },
 };
 
 export function detectTier(): Tier {
@@ -54,7 +54,17 @@ export function detectTier(): Tier {
 
 /* ------------------------------------------------------------------- easing */
 
-/** Piecewise smoothstep through (progress, value) stops. */
+/**
+ * Ken Perlin's smootherstep. Zero first *and* second derivative at both ends,
+ * so where two ramp segments meet there is no change in acceleration. Plain
+ * smoothstep is only C0 at the joins, which is what made the choreography feel
+ * faintly stepped between beats.
+ */
+function smoother(t: number): number {
+  return t * t * t * (t * (t * 6 - 15) + 10);
+}
+
+/** Piecewise smootherstep through (progress, value) stops. */
 function ramp(p: number, stops: readonly (readonly [number, number])[]): number {
   if (p <= stops[0][0]) return stops[0][1];
   const last = stops[stops.length - 1];
@@ -64,7 +74,7 @@ function ramp(p: number, stops: readonly (readonly [number, number])[]): number 
     const [p1, v1] = stops[i + 1];
     if (p >= p0 && p <= p1) {
       const t = p1 === p0 ? 0 : (p - p0) / (p1 - p0);
-      return v0 + (v1 - v0) * (t * t * (3 - 2 * t));
+      return v0 + (v1 - v0) * smoother(t);
     }
   }
   return last[1];
@@ -91,22 +101,22 @@ interface Key {
  */
 const KEYS: Key[] = [
   //            act  camera position              look-at
-  { p: 0.000, pos: [ 1.85,  0.62,  4.05], tgt: [ 0.00, -0.06,  0.00] }, // 00 hero, 3/4
-  { p: 0.080, pos: [ 1.55,  0.50,  3.70], tgt: [ 0.00, -0.04,  0.00] },
-  { p: 0.170, pos: [ 0.55,  0.30,  3.05], tgt: [ 0.00,  0.00,  0.00] }, // 01 close on cortex
-  { p: 0.245, pos: [ 1.10,  1.62,  3.35], tgt: [ 0.00,  0.12,  0.00], roll: 0.02 },
-  { p: 0.290, pos: [ 1.70,  1.95,  3.35], tgt: [ 0.00,  0.12,  0.00], roll: 0.02 }, // 02 the cap, from above
-  { p: 0.350, pos: [ 3.40,  0.90,  2.20], tgt: [ 0.45, -0.10, -0.10] },
-  { p: 0.400, pos: [ 3.25,  0.06,  0.40], tgt: [ 1.14, -0.27, -0.10] }, // 03 lateral on the ear
-  { p: 0.470, pos: [ 3.10,  0.10,  1.10], tgt: [ 1.40, -0.22,  0.12] },
-  { p: 0.520, pos: [ 2.95,  0.16,  2.15], tgt: [ 1.85, -0.16,  0.42] }, // 04 traces leaving
-  { p: 0.615, pos: [ 2.30,  0.26,  3.30], tgt: [ 1.45, -0.05,  0.55] }, // 05 separation
-  { p: 0.700, pos: [ 0.85,  0.34,  4.05], tgt: [ 0.25,  0.02,  0.30] },
-  { p: 0.735, pos: [-0.20,  0.42,  4.55], tgt: [ 0.02,  0.02,  0.10], roll: -0.012 }, // 06 lattice
-  { p: 0.830, pos: [ 0.75,  0.22,  2.25], tgt: [ 0.02, -0.06,  0.00] }, // 07 device
-  { p: 0.900, pos: [ 0.35,  0.14,  3.40], tgt: [ 0.00, -0.04,  0.00] },
-  { p: 0.960, pos: [ 0.95,  0.40,  4.60], tgt: [ 0.00, -0.04,  0.00] }, // 08 reformed
-  { p: 1.000, pos: [ 0.70,  0.34,  6.60], tgt: [ 0.00, -0.04,  0.00] },
+  { p: 0.000, pos: [  1.85,  0.62,  4.05], tgt: [ 0.00, -0.06,  0.00] }, // 00 hero, 3/4
+  { p: 0.080, pos: [  1.65,  0.53,  3.93], tgt: [ 0.00, -0.04,  0.00] },
+  { p: 0.170, pos: [  0.77,  0.42,  4.26], tgt: [ 0.00,  0.00,  0.00] }, // 01 close on cortex
+  { p: 0.245, pos: [  1.21,  1.76,  3.67], tgt: [ 0.00,  0.12,  0.00], roll: 0.02 },
+  { p: 0.290, pos: [  1.75,  2.00,  3.45], tgt: [ 0.00,  0.12,  0.00], roll: 0.02 }, // 02 the cap, from above
+  { p: 0.350, pos: [  3.35,  0.88,  2.16], tgt: [ 0.45, -0.10, -0.10] },
+  { p: 0.400, pos: [  4.22,  0.21,  0.63], tgt: [ 1.14, -0.27, -0.10] }, // 03 lateral on the ear
+  { p: 0.470, pos: [  4.31,  0.33,  1.80], tgt: [ 1.40, -0.22,  0.12] },
+  { p: 0.520, pos: [  3.86,  0.43,  3.59], tgt: [ 1.85, -0.16,  0.42] }, // 04 traces leaving
+  { p: 0.615, pos: [  2.71,  0.41,  4.63], tgt: [ 1.45, -0.05,  0.55] }, // 05 separation
+  { p: 0.700, pos: [  0.96,  0.40,  4.73], tgt: [ 0.25,  0.02,  0.30] },
+  { p: 0.735, pos: [ -0.21,  0.43,  4.68], tgt: [ 0.02,  0.02,  0.10], roll: -0.012 }, // 06 lattice
+  { p: 0.830, pos: [  0.82,  0.25,  2.46], tgt: [ 0.02, -0.06,  0.00] }, // 07 device
+  { p: 0.900, pos: [  0.43,  0.18,  4.17], tgt: [ 0.00, -0.04,  0.00] },
+  { p: 0.960, pos: [  0.97,  0.41,  4.68], tgt: [ 0.00, -0.04,  0.00] }, // 08 reformed
+  { p: 1.000, pos: [  0.59,  0.28,  5.56], tgt: [ 0.00, -0.04,  0.00] },
 ];
 
 /**
@@ -143,7 +153,7 @@ function sampleKeys(p: number, outPos: THREE.Vector3, outTgt: THREE.Vector3): nu
   const b = KEYS[i + 1];
   const raw = b.p === a.p ? 0 : (p - a.p) / (b.p - a.p);
   const t = Math.min(1, Math.max(0, raw));
-  const e = t * t * (3 - 2 * t);
+  const e = smoother(t);
 
   outPos.set(
     a.pos[0] + (b.pos[0] - a.pos[0]) * e,
@@ -164,6 +174,8 @@ export interface JourneyOptions {
   tier?: Tier;
   reducedMotion?: boolean;
   onReady?: () => void;
+  /** Pulled once per frame; avoids a second rAF loop and a layout read. */
+  getProgress?: () => number;
 }
 
 export interface JourneyHandle {
@@ -224,13 +236,14 @@ export function createJourney(
     uTime: { value: 0 },
     uAssemble: { value: 0 },
     uDissolve: { value: 0 },
-    uSize: { value: 0.0050 },
+    uSize: { value: 0.0046 },
     uScale: { value: 1000 },
     uOpacity: { value: 1 },
-    uExposure: { value: 1.12 },
+    uExposure: { value: 1.50 },
     uFogNear: { value: 3 },
     uFogFar: { value: 7 },
     uPulses: { value: [new THREE.Vector4(0, 0, 0, -1), new THREE.Vector4(0, 0, 0, -1), new THREE.Vector4(0, 0, 0, -1), new THREE.Vector4(0, 0, 0, -1)] },
+    uTouch: { value: new THREE.Vector4(0, 0, 0, 0) },
     uBone: { value: BONE },
     uSignal: { value: SIGNAL },
   };
@@ -479,62 +492,114 @@ export function createJourney(
   /* ------------------------------------------------------------- device ---- */
 
   /**
-   * Concept geometry only — an around-ear hook with contact sites. No prototype
-   * has been built; the copy alongside this act says so.
+   * Concept geometry only — an in-ear bud with sensing contacts on the tip.
+   * No prototype has been built; the copy alongside this act says so.
+   *
+   * Built from three parametric parts so the silhouette is a recognisable
+   * earbud rather than an abstract shape: the body that sits in the concha,
+   * the tip that enters the canal, and a short stem below it.
    */
   const device = (() => {
-    const curve = new THREE.CatmullRomCurve3([
-      new THREE.Vector3( 0.20,  0.44,  0.05),
-      new THREE.Vector3( 0.02,  0.52, -0.07),
-      new THREE.Vector3(-0.15,  0.41, -0.18),
-      new THREE.Vector3(-0.22,  0.15, -0.22),
-      new THREE.Vector3(-0.18, -0.10, -0.17),
-      new THREE.Vector3(-0.03, -0.26, -0.06),
-      new THREE.Vector3( 0.15, -0.24,  0.09),
-      new THREE.Vector3( 0.24, -0.09,  0.16),
-    ], false, 'catmullrom', 0.4);
-
-    const SEGMENTS = tier === 'low' ? 150 : 340;
-    const RING = tier === 'low' ? 9 : 16;
-    const frames = curve.computeFrenetFrames(SEGMENTS, false);
-
     const pos: number[] = [];
     const nrm: number[] = [];
     const scat: number[] = [];
     const seed: number[] = [];
     const node: number[] = [];
+    let n = 0;
 
-    // Contact sites sit on the behind-the-ear span of the hook.
-    const CONTACTS = [0.30, 0.44, 0.58, 0.70];
+    const push = (
+      x: number, y: number, z: number,
+      nx: number, ny: number, nz: number,
+      isNode: number,
+    ) => {
+      pos.push(x, y, z);
+      const l = Math.hypot(nx, ny, nz) || 1;
+      nrm.push(nx / l, ny / l, nz / l);
+      const sd = hash1(n * 37 + 11);
+      seed.push(sd);
+      node.push(isNode);
+      const a = hash1(n * 13 + 5) * Math.PI * 2;
+      const rr = 2.0 + hash1(n * 17 + 7) * 2.8;
+      scat.push(Math.cos(a) * rr, (hash1(n * 5 + 3) - 0.5) * 3.0, Math.sin(a) * rr);
+      n++;
+    };
 
-    for (let i = 0; i <= SEGMENTS; i++) {
-      const t = i / SEGMENTS;
-      const p = curve.getPointAt(t);
-      const N = frames.normals[Math.min(i, frames.normals.length - 1)];
-      const B = frames.binormals[Math.min(i, frames.binormals.length - 1)];
-      // Taper: thicker at the pod end, slimmer over the ear.
-      const r = 0.030 + 0.026 * Math.pow(Math.max(0, t - 0.72) / 0.28, 1.4)
-                      + 0.008 * Math.sin(t * Math.PI);
-      const nearContact = CONTACTS.reduce(
-        (acc, c) => Math.max(acc, 1 - Math.min(1, Math.abs(t - c) / 0.022)), 0,
-      );
-      for (let k = 0; k < RING; k++) {
-        const a = (k / RING) * Math.PI * 2;
-        const dx = Math.cos(a), dy = Math.sin(a);
-        const nx = N.x * dx + B.x * dy;
-        const ny = N.y * dx + B.y * dy;
-        const nz = N.z * dx + B.z * dy;
-        pos.push(p.x + nx * r, p.y + ny * r, p.z + nz * r);
-        nrm.push(nx, ny, nz);
-        const sd = hash1(i * 31 + k * 7);
-        seed.push(sd);
-        // Contacts face inward, toward the head (-X side of the hook).
-        node.push(nearContact > 0 && nx < -0.25 ? 1 : 0);
-        const a2 = hash1(i * 13 + k) * Math.PI * 2;
-        const rr = 2.2 + hash1(i * 17 + k) * 2.6;
-        scat.push(Math.cos(a2) * rr, (hash1(i * 5 + k) - 0.5) * 3.2, Math.sin(a2) * rr);
-      }
+    const dense = tier === 'low' ? 0.42 : tier === 'mid' ? 0.72 : 1;
+
+    // --- body: the mass that seats in the concha ---------------------------
+    const BODY = Math.round(4200 * dense);
+    const RB = [0.172, 0.138, 0.152];
+    for (let i = 0; i < BODY; i++) {
+      const yv = 1 - (i / (BODY - 1)) * 2;
+      const r = Math.sqrt(Math.max(0, 1 - yv * yv));
+      const phi = i * 2.399963229728653;
+      const dx = Math.cos(phi) * r, dy = yv, dz = Math.sin(phi) * r;
+      // Flatten the medial face where the tip joins, and tuck the underside in.
+      const flat = 1 - 0.20 * Math.max(0, -dx);
+      const px = dx * RB[0] * flat;
+      const py = dy * RB[1] * (1 - 0.14 * Math.max(0, -dy));
+      const pz = dz * RB[2] * flat;
+      push(px, py, pz, px / RB[0], py / RB[1], pz / RB[2], 0);
     }
+
+    /** Tapered tube with a rounded end, used for the tip and the stem. */
+    const tube = (
+      p0: [number, number, number], p1: [number, number, number],
+      r0: number, r1: number, count: number, cap: boolean,
+      nodeAt: number[] = [],
+    ) => {
+      const ax = [p1[0] - p0[0], p1[1] - p0[1], p1[2] - p0[2]];
+      const L = Math.hypot(...ax);
+      const A = ax.map((v) => v / L);
+      // Any vector not parallel to A gives a usable basis.
+      const ref: [number, number, number] = Math.abs(A[1]) > 0.9 ? [1, 0, 0] : [0, 1, 0];
+      const U = [
+        A[1] * ref[2] - A[2] * ref[1],
+        A[2] * ref[0] - A[0] * ref[2],
+        A[0] * ref[1] - A[1] * ref[0],
+      ];
+      const ul = Math.hypot(...U);
+      const Un = U.map((v) => v / ul);
+      const V = [
+        A[1] * Un[2] - A[2] * Un[1],
+        A[2] * Un[0] - A[0] * Un[2],
+        A[0] * Un[1] - A[1] * Un[0],
+      ];
+
+      for (let i = 0; i < count; i++) {
+        const t = hash1(i * 7 + 101);
+        const a = hash1(i * 7 + 103) * Math.PI * 2;
+        const r = r0 + (r1 - r0) * t;
+        const cx = p0[0] + ax[0] * t, cy = p0[1] + ax[1] * t, cz = p0[2] + ax[2] * t;
+        const nx = Un[0] * Math.cos(a) + V[0] * Math.sin(a);
+        const ny = Un[1] * Math.cos(a) + V[1] * Math.sin(a);
+        const nz = Un[2] * Math.cos(a) + V[2] * Math.sin(a);
+        const isNode = nodeAt.some((c) => Math.abs(t - c) < 0.055) ? 1 : 0;
+        push(cx + nx * r, cy + ny * r, cz + nz * r, nx, ny, nz, isNode);
+      }
+
+      if (cap) {
+        const CAP = Math.round(count * 0.22);
+        for (let i = 0; i < CAP; i++) {
+          const yv = (i / (CAP - 1)) * 0.98;
+          const rr = Math.sqrt(Math.max(0, 1 - yv * yv));
+          const phi = i * 2.399963229728653;
+          const nx = Un[0] * Math.cos(phi) * rr + V[0] * Math.sin(phi) * rr + A[0] * yv;
+          const ny = Un[1] * Math.cos(phi) * rr + V[1] * Math.sin(phi) * rr + A[1] * yv;
+          const nz = Un[2] * Math.cos(phi) * rr + V[2] * Math.sin(phi) * rr + A[2] * yv;
+          push(p1[0] + nx * r1, p1[1] + ny * r1, p1[2] + nz * r1, nx, ny, nz, 0);
+        }
+      }
+    };
+
+    // --- tip: a short canal nozzle, not a spike ----------------------------
+    // Contacts ring it where it meets the canal wall.
+    tube([-0.095, 0.015, 0.012], [-0.208, 0.046, 0.040],
+         0.084, 0.068, Math.round(2000 * dense), true, [0.40, 0.82]);
+
+    // --- tail: a stub, the length of an ear cuff rather than a stem --------
+    tube([0.045, -0.088, 0.012], [0.086, -0.182, 0.024],
+         0.058, 0.048, Math.round(1200 * dense), true, [0.88]);
 
     const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(pos), 3));
@@ -542,11 +607,12 @@ export function createJourney(
     g.setAttribute('aScatter', new THREE.BufferAttribute(new Float32Array(scat), 3));
     g.setAttribute('aSeed', new THREE.BufferAttribute(new Float32Array(seed), 1));
     g.setAttribute('aNode', new THREE.BufferAttribute(new Float32Array(node), 1));
+    g.boundingSphere = new THREE.Sphere(new THREE.Vector3(0, -0.1, 0), 3);
 
     const u = {
       uTime: { value: 0 },
       uScale: { value: 1000 },
-      uSize: { value: 0.016 },
+      uSize: { value: 0.0125 },
       uForm: { value: 0 },
       uOpacity: { value: 0 },
       uBone: { value: BONE },
@@ -564,7 +630,7 @@ export function createJourney(
       }),
     );
     pts.frustumCulled = false;
-    pts.scale.setScalar(1.55);
+    pts.scale.setScalar(2.9);
     world.add(pts);
     return { points: pts, uniforms: u, geometry: g };
   })();
@@ -601,6 +667,13 @@ export function createJourney(
    * by widening the lens and the rest by backing the camera off.
    */
   let fitBoost = 1;
+  /**
+   * Resolution scale, adjusted from measured frame time. A fixed device pixel
+   * ratio is the usual reason a heavy scene stutters on one machine and not
+   * another; this trades sharpness for a steady frame instead.
+   */
+  let resScale = 1;
+  let frameAvg = 16.7;
   const BASE_FOV = 42;
   const FIT_ASPECT = 1.35;
   const MAX_FOV_FACTOR = 1.45;
@@ -609,7 +682,7 @@ export function createJourney(
     const parent = canvas.parentElement;
     width = Math.max(1, parent?.clientWidth ?? window.innerWidth);
     height = Math.max(1, parent?.clientHeight ?? window.innerHeight);
-    const dpr = Math.min(window.devicePixelRatio || 1, q.dprCap);
+    const dpr = Math.min(window.devicePixelRatio || 1, q.dprCap) * resScale;
 
     renderer.setPixelRatio(dpr);
     renderer.setSize(width, height, false);
@@ -657,12 +730,25 @@ export function createJourney(
   const _aim = new THREE.Vector3();
   const _up = new THREE.Vector3();
 
+  /**
+   * Cursor-to-cortex. The pointer is cast at a sphere standing in for the
+   * cerebrum; where it lands becomes a local activation the shader answers to.
+   */
+  const raycaster = new THREE.Raycaster();
+  const _ndc = new THREE.Vector2();
+  const _hit = new THREE.Vector3();
+  const TOUCH_SPHERE = new THREE.Sphere(new THREE.Vector3(0, -0.10, 0), 1.40);
+  const touchPos = new THREE.Vector3(0, 0, 3);
+  const touchAim = new THREE.Vector3(0, 0, 3);
+  let touchStrength = 0;
+
   let targetProgress = 0;
   let progress = 0;
   let assemble = 0;
   let clockT = 0;
   let paused = false;
   let snapCam = false;
+  let lastResCheck = 0;
   let pointerX = 0;
   let pointerY = 0;
   let parallaxX = 0;
@@ -691,12 +777,26 @@ export function createJourney(
     raf = requestAnimationFrame(frame);
     if (paused) { last = now; return; }
 
-    const dt = Math.min(0.05, (now - last) / 1000);
+    const frameMs = now - last;
+    const dt = Math.min(0.05, frameMs / 1000);
     last = now;
+
+    // Rolling frame time, with a wide deadband so it never oscillates.
+    if (frameMs > 0 && frameMs < 200) frameAvg += (frameMs - frameAvg) * 0.04;
+    if (!reduced && now - lastResCheck > 1400) {
+      lastResCheck = now;
+      const wanted = frameAvg > 26 ? resScale - 0.12
+                   : frameAvg < 14 ? resScale + 0.08
+                   : resScale;
+      const clamped = Math.max(0.62, Math.min(1, wanted));
+      if (Math.abs(clamped - resScale) > 0.01) { resScale = clamped; resize(); }
+    }
     if (!reduced) clockT += dt;
 
+    if (options.getProgress) targetProgress = Math.min(1, Math.max(0, options.getProgress()));
+
     // Weighted spring toward the scroll target: the scene has mass.
-    progress += (targetProgress - progress) * (reduced ? 1 : Math.min(1, dt * 2.6));
+    progress += (targetProgress - progress) * (reduced ? 1 : Math.min(1, dt * 4.5));
 
     // Assemble from the scatter field on first load.
     const elapsed = (now - startedAt) / 1000;
@@ -708,18 +808,28 @@ export function createJourney(
 
     /* ---- act weights ---------------------------------------------------- */
 
+    // The cortex holds far longer than it used to, comes apart once as a single
+    // set-piece, and starts reassembling while the device is still on screen,
+    // so the right side of the frame is never left empty.
     const brainVisible = ramp(p, [
-      [0.00, 1], [0.50, 1], [0.60, 0.40], [0.70, 0.13], [0.79, 0.0],
-      [0.88, 0.0], [0.93, 0.9], [1.00, 1],
+      [0.00, 1], [0.58, 1], [0.645, 0.62], [0.70, 0.24], [0.765, 0.0],
+      [0.855, 0.0], [0.885, 0.35], [0.95, 1], [1.00, 1],
     ]);
-    const dissolve = ramp(p, [[0.54, 0], [0.66, 0.26], [0.79, 0.6], [0.88, 0.6], [0.93, 0]]);
-    const wireVisible = ramp(p, [[0.00, 0.5], [0.15, 1], [0.34, 0.85], [0.50, 0.25], [0.60, 0], [0.90, 0], [1.00, 0.55]]);
+    const dissolve = ramp(p, [
+      [0.575, 0], [0.64, 0.26], [0.72, 0.58], [0.78, 0.72], [0.865, 0.72], [0.955, 0],
+    ]);
+    const wireVisible = ramp(p, [[0.00, 0.5], [0.15, 1], [0.34, 0.85], [0.50, 0.28], [0.58, 0], [0.88, 0], [0.97, 0.6], [1.00, 0.6]]);
     const scalpVisible = ramp(p, [[0.20, 0], [0.25, 1], [0.32, 1], [0.365, 0]]);
-    const earVisible = ramp(p, [[0.325, 0], [0.37, 1], [0.54, 1], [0.60, 0]]);
-    const traceVisible = ramp(p, [[0.425, 0], [0.47, 1], [0.645, 1], [0.685, 0]]);
+    // Second window at the end: the array back on a reassembled cortex, which
+    // is the adoption beat's subject rather than another abstract object.
+    const earVisible = Math.max(
+      ramp(p, [[0.325, 0], [0.37, 1], [0.545, 1], [0.60, 0]]),
+      ramp(p, [[0.925, 0], [0.965, 0.6], [1.00, 0.6]]),
+    );
+    const traceVisible = ramp(p, [[0.425, 0], [0.47, 1], [0.645, 1], [0.692, 0]]);
     const separate = ramp(p, [[0.545, 0], [0.62, 1]]);
-    const latticeVisible = ramp(p, [[0.665, 0], [0.71, 1], [0.785, 1], [0.815, 0]]);
-    const deviceVisible = ramp(p, [[0.785, 0], [0.825, 1], [0.885, 1], [0.915, 0]]);
+    const latticeVisible = ramp(p, [[0.655, 0], [0.70, 1], [0.78, 1], [0.812, 0]]);
+    const deviceVisible = ramp(p, [[0.775, 0], [0.815, 1], [0.885, 1], [0.930, 0]]);
 
     /* ---- cortex ---------------------------------------------------------- */
 
@@ -756,7 +866,7 @@ export function createJourney(
     scalpArray.uniforms.uActive.value = span(p, 0.22, 0.30);
     scalpArray.points.visible = scalpVisible > 0.004;
 
-    const earActive = span(p, 0.34, 0.42);
+    const earActive = Math.max(span(p, 0.34, 0.42), span(p, 0.93, 0.98));
     for (const arr of [earArrayR, earArrayL]) {
       arr.uniforms.uTime.value = clockT;
       arr.uniforms.uOpacity.value = earVisible;
@@ -794,9 +904,11 @@ export function createJourney(
 
     device.uniforms.uTime.value = clockT;
     device.uniforms.uOpacity.value = deviceVisible;
-    device.uniforms.uForm.value = ramp(p, [[0.785, 0], [0.84, 1], [0.885, 1], [0.915, 0.3]]);
+    device.uniforms.uForm.value = ramp(p, [[0.775, 0], [0.83, 1], [0.885, 1], [0.930, 0.3]]);
     device.points.visible = deviceVisible > 0.004;
-    device.points.rotation.y = -0.5 + clockT * 0.22;
+    device.points.rotation.y = 0.58 + (reduced ? 0 : Math.sin(clockT * 0.26) * 0.30);
+    device.points.rotation.x = 0.14 + (reduced ? 0 : Math.sin(clockT * 0.19) * 0.07);
+    device.points.rotation.z = -0.22;
 
     /* ---- world motion ---------------------------------------------------- */
 
@@ -804,19 +916,20 @@ export function createJourney(
     // quarter turn so scrolling feels like it is driving the rotation.
     // Oscillating idle rather than a continuous spin: the scene stays alive
     // without drifting away from the angle each act needs.
-    world.rotation.y = ramp(p, ROTATION) + (reduced ? 0 : Math.sin(clockT * 0.24) * 0.035);
+    world.rotation.y = ramp(p, ROTATION)
+      + (reduced ? 0 : Math.sin(clockT * 0.24) * 0.042 + Math.sin(clockT * 0.091) * 0.022);
     world.rotation.x = Math.sin(p * Math.PI) * 0.055;
 
     // Slide the subject across the frame so it never sits under the copy. On
     // narrow viewports the copy runs full width, so the offset is dropped.
     const composeTarget = aspectNarrow ? 0 : ramp(p, COMPOSITION);
-    composeX += (composeTarget - composeX) * (reduced ? 1 : Math.min(1, dt * 1.8));
+    composeX += (composeTarget - composeX) * (reduced ? 1 : Math.min(1, dt * 3.0));
 
     /* ---- camera ---------------------------------------------------------- */
 
     const roll = sampleKeys(p, wantPos, wantTgt);
     if (fitBoost > 1.001) wantPos.multiplyScalar(fitBoost);
-    const k = reduced || snapCam ? 1 : Math.min(1, dt * 2.2);
+    const k = reduced || snapCam ? 1 : Math.min(1, dt * 4.0);
     snapCam = false;
     camPos.lerp(wantPos, k);
     camTgt.lerp(wantTgt, k);
@@ -835,8 +948,8 @@ export function createJourney(
 
     // Pointer parallax: the frame drifts against the cursor, which reads as
     // depth rather than as a moving object.
-    parallaxX += (pointerX - parallaxX) * (reduced ? 1 : Math.min(1, dt * 1.6));
-    parallaxY += (pointerY - parallaxY) * (reduced ? 1 : Math.min(1, dt * 1.6));
+    parallaxX += (pointerX - parallaxX) * (reduced ? 1 : Math.min(1, dt * 2.4));
+    parallaxY += (pointerY - parallaxY) * (reduced ? 1 : Math.min(1, dt * 2.4));
     _up.copy(camera.up);
     camera.position.addScaledVector(_right, parallaxX * halfW * 0.075);
     camera.position.addScaledVector(_up, -parallaxY * halfH * 0.055);
@@ -845,6 +958,24 @@ export function createJourney(
     // On narrow viewports the copy stacks above, so drop the subject in frame.
     if (aspectNarrow) _aim.addScaledVector(camera.up, 0.40 * halfH);
     camera.lookAt(_aim);
+
+    // Matrices are current here, so the cursor cast happens after the camera
+    // has been placed for this frame.
+    let wantTouch = 0;
+    if (finePointer && !reduced && brainVisible > 0.25) {
+      camera.updateMatrixWorld();
+      _ndc.set(pointerX, -pointerY);
+      raycaster.setFromCamera(_ndc, camera);
+      if (raycaster.ray.intersectSphere(TOUCH_SPHERE, _hit)) {
+        world.updateMatrixWorld();
+        touchAim.copy(world.worldToLocal(_hit));
+        wantTouch = 1;
+      }
+    }
+    touchPos.lerp(touchAim, Math.min(1, dt * 7));
+    touchStrength += (wantTouch - touchStrength) * Math.min(1, dt * (wantTouch ? 5 : 3));
+    (brainUniforms.uTouch.value as THREE.Vector4)
+      .set(touchPos.x, touchPos.y, touchPos.z, touchStrength * brainVisible);
 
     gradePass.uniforms.uTime.value = clockT;
     if (bloomPass) {

@@ -21,11 +21,11 @@ export default function ModelsPage() {
         lede="Each card carries the same fields whether or not the answer is flattering. All three are planned: nothing has been trained, and no metric on this page is filled in."
       />
 
-      <div className="shell" style={{ paddingBottom: 'clamp(50px, 8vw, 110px)' }}>
+      <div className="shell" style={{ paddingBottom: 'clamp(36px, 5vw, 72px)' }}>
         <hr className="rule" />
 
         {models.map((m, i) => (
-          <section key={m.id} style={{ paddingBlock: 'clamp(38px, 5vw, 72px)', borderBottom: '1px solid var(--rule)' }}>
+          <section key={m.id} style={{ paddingBlock: 'clamp(28px, 3.8vw, 54px)', borderBottom: '1px solid var(--rule)' }}>
             <SectionLabel index={String(i + 1).padStart(2, '0')}>Model card</SectionLabel>
 
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center', marginBottom: 18 }}>
@@ -59,7 +59,7 @@ export default function ModelsPage() {
           </section>
         ))}
 
-        <section style={{ paddingBlock: 'clamp(40px, 5.5vw, 80px)' }}>
+        <section style={{ paddingBlock: 'clamp(30px, 4vw, 58px)' }}>
           <SectionLabel index="E">Experiments</SectionLabel>
           <div className="rows">
             {experiments.map((e) => (

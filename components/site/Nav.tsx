@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
+import { asset } from '@/lib/asset';
 import { site } from '@/content/site';
 
 export function Nav() {
@@ -32,7 +33,7 @@ export function Nav() {
       <header className="nav mono">
         <Link href="/" className="nav-mark" aria-label={`${site.name} — home`}>
           <Image
-            src="/brand/cerebral-lockup.png"
+            src={asset("/brand/cerebral-lockup.png")}
             alt={site.name}
             width={1883}
             height={292}

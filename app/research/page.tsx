@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { PageHeader } from '@/components/site/PageHeader';
 import { PageShell } from '@/components/site/PageShell';
 import { ResearchIndex } from '@/components/research/ResearchIndex';
-import { allTags, studies } from '@/content/research';
+import { studies } from '@/content/research';
 
 export const metadata: Metadata = {
   title: 'Research',
@@ -20,8 +20,8 @@ export default function ResearchPage() {
         title="Every claim here traces to a question, a method, or a labelled gap."
         lede="Three research outputs are in play. One is active, two are planned. Nothing below reports a result, because no result has been produced yet — and a page that pretended otherwise would be worthless to everyone who reads it."
       />
-      <div className="shell" style={{ paddingBottom: 'clamp(50px, 8vw, 110px)' }}>
-        <ResearchIndex studies={studies} tags={allTags} />
+      <div className="shell" style={{ paddingBottom: 'clamp(36px, 5vw, 72px)' }}>
+        <ResearchIndex studies={studies} />
       </div>
     </PageShell>
   );

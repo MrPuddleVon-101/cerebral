@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 import { PageHeader } from '@/components/site/PageHeader';
 import { PageShell } from '@/components/site/PageShell';
-import { Caveat, SectionLabel } from '@/components/site/ui';
+import { Caveat, PlannedNote, SectionLabel } from '@/components/site/ui';
 
 export const metadata: Metadata = {
   title: 'Technology',
@@ -21,10 +21,10 @@ export default function TechnologyPage() {
         lede="Two layers. The signal layer is physics and physiology: what reaches an electrode and in what state. The model layer is what can be recovered from it. Conflating the two is how neurotechnology gets oversold."
       />
 
-      <div className="shell" style={{ paddingBottom: 'clamp(50px, 8vw, 110px)' }}>
+      <div className="shell" style={{ paddingBottom: 'clamp(36px, 5vw, 72px)' }}>
         <hr className="rule" />
 
-        <section style={{ paddingBlock: 'clamp(40px, 5.5vw, 80px)' }}>
+        <section style={{ paddingBlock: 'clamp(30px, 4vw, 58px)' }}>
           <SectionLabel index="01">Signal layer</SectionLabel>
           <div className="rows">
             {[
@@ -70,7 +70,7 @@ export default function TechnologyPage() {
 
         <hr className="rule" />
 
-        <section style={{ paddingBlock: 'clamp(40px, 5.5vw, 80px)' }}>
+        <section style={{ paddingBlock: 'clamp(30px, 4vw, 58px)' }}>
           <SectionLabel index="02">What a decoder is, precisely</SectionLabel>
           <p className="lede" style={{ marginBottom: 'clamp(24px, 3vw, 38px)' }}>
             A decoder maps a short window of multichannel voltage onto a label. That is the whole
@@ -87,7 +87,7 @@ export default function TechnologyPage() {
 
         <hr className="rule" />
 
-        <section style={{ paddingBlock: 'clamp(40px, 5.5vw, 80px)' }}>
+        <section style={{ paddingBlock: 'clamp(30px, 4vw, 58px)' }}>
           <SectionLabel index="03">Models</SectionLabel>
           <p className="dim" style={{ marginBottom: 'clamp(22px, 3vw, 34px)', maxWidth: '58ch' }}>
             Every significant computational model gets a model card with the same fields, including
@@ -100,16 +100,13 @@ export default function TechnologyPage() {
 
         <hr className="rule" />
 
-        <section style={{ paddingBlock: 'clamp(40px, 5.5vw, 80px)' }}>
+        <section style={{ paddingBlock: 'clamp(30px, 4vw, 58px)' }}>
           <SectionLabel index="04">Interactive demos</SectionLabel>
-          <div className="empty mono">
-            <p style={{ color: 'var(--bone-70)', margin: 0 }}>Planned, not built.</p>
-            <p className="dimmer" style={{ textTransform: 'none', letterSpacing: '0.03em', marginTop: 14, marginBottom: 0, maxWidth: '58ch' }}>
-              The architecture reserves room for an electrode-configuration explorer, an annotated
-              signal viewer, a performance-versus-sensor-count chart and a model comparison. None of
-              them can exist honestly before there is data to put in them.
-            </p>
-          </div>
+          <PlannedNote>
+            An electrode-configuration explorer, an annotated signal viewer, a
+            performance-versus-sensor-count chart and a model comparison. None of them can exist
+            honestly before there is data to put in them.
+          </PlannedNote>
         </section>
       </div>
     </PageShell>

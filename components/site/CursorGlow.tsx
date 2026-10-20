@@ -10,6 +10,7 @@ import { useEffect, useRef } from 'react';
  * underneath. Fine pointers only, and off under reduced motion.
  */
 export function CursorGlow() {
+  const wrapRef = useRef<HTMLDivElement>(null);
   const haloRef = useRef<HTMLDivElement>(null);
   const coreRef = useRef<HTMLDivElement>(null);
 
@@ -17,9 +18,10 @@ export function CursorGlow() {
     if (!window.matchMedia('(pointer: fine)').matches) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
+    const wrap = wrapRef.current;
     const halo = haloRef.current;
     const core = coreRef.current;
-    if (!halo || !core) return;
+    if (!wrap || !halo || !core) return;
 
     let tx = window.innerWidth / 2;
     let ty = window.innerHeight / 2;
@@ -30,6 +32,11 @@ export function CursorGlow() {
     const onMove = (e: PointerEvent) => {
       tx = e.clientX;
       ty = e.clientY;
+      const el = e.target as Element | null;
+      const hot = !!el?.closest?.('a, button, [role="button"], input, summary');
+      if (hot !== wrap.dataset.hot?.startsWith('t')) {
+        wrap.dataset.hot = String(hot);
+      }
       if (!visible) {
         visible = true;
         hx = cx = tx;
@@ -46,10 +53,10 @@ export function CursorGlow() {
 
     const tick = () => {
       raf = requestAnimationFrame(tick);
-      hx += (tx - hx) * 0.055;
-      hy += (ty - hy) * 0.055;
-      cx += (tx - cx) * 0.20;
-      cy += (ty - cy) * 0.20;
+      hx += (tx - hx) * 0.032;
+      hy += (ty - hy) * 0.032;
+      cx += (tx - cx) * 0.105;
+      cy += (ty - cy) * 0.105;
       halo.style.transform = `translate3d(${hx}px, ${hy}px, 0) translate(-50%, -50%)`;
       core.style.transform = `translate3d(${cx}px, ${cy}px, 0) translate(-50%, -50%)`;
     };
@@ -68,9 +75,9 @@ export function CursorGlow() {
   }, []);
 
   return (
-    <div className="cursor-glow" aria-hidden>
-      <div className="cursor-glow-halo" ref={haloRef} />
-      <div className="cursor-glow-core" ref={coreRef} />
+    <div className="cursor-glow" aria-hidden ref={wrapRef} data-hot="false">
+      <div className="cursor-glow-halo" ref={haloRef}><i /></div>
+      <div className="cursor-glow-core" ref={coreRef}><i /></div>
     </div>
   );
 }

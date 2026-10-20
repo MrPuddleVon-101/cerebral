@@ -26,63 +26,136 @@ export function Journey() {
   const meterRef = useRef<HTMLElement | null>(null);
   const [active, setActive] = useState(0);
   const [ready, setReady] = useState(false);
+  const progressRef = useRef(0);
 
   const onReady = useCallback(() => setReady(true), []);
 
   /**
-   * One rAF loop drives every beat's opacity and drift, plus the rail and the
-   * progress meter. Doing this per frame rather than on scroll events keeps the
-   * copy in step with the smooth-scrolled camera.
+   * One rAF loop drives every beat's opacity and drift, the rail, the progress
+   * meter and the 3D timeline.
+   *
+   * Element geometry is measured once and cached. Calling getBoundingClientRect
+   * per element per frame, interleaved with style writes, forces a full layout
+   * on every frame, and that was the single largest source of scroll judder.
+   * Everything below reads window.scrollY only, and writes nothing but
+   * compositor properties.
    */
   useEffect(() => {
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let raf = 0;
 
+    interface Beat {
+      body: HTMLElement;
+      kids: HTMLElement[];
+      heading: HTMLElement | null;
+      top: number;
+      height: number;
+    }
+    let beats: Beat[] = [];
+    let hostTop = 0;
+    let hostSpan = 1;
+
+    const measure = () => {
+      const host = scrollRef.current;
+      if (!host) return;
+      hostTop = host.offsetTop;
+      hostSpan = Math.max(1, host.offsetHeight - window.innerHeight);
+      beats = actRefs.current.flatMap((el) => {
+        const body = el?.querySelector<HTMLElement>('.act-body');
+        if (!el || !body) return [];
+        return [{
+          body,
+          kids: Array.from(body.children) as HTMLElement[],
+          heading: body.querySelector<HTMLElement>('.act-heading'),
+          top: el.offsetTop,
+          height: el.offsetHeight,
+        }];
+      });
+    };
+
+    measure();
+
+    // The cache has to survive everything that can change the layout after
+    // first paint: fonts landing, images loading, and above all a viewport
+    // resize, since the beats are sized in svh. A stale cache here runs the
+    // timeline past its end.
+    const ro = new ResizeObserver(measure);
+    if (scrollRef.current) ro.observe(scrollRef.current);
+    document.fonts?.ready.then(measure).catch(() => undefined);
+
+    let resizeTimer = 0;
+    const onResize = () => {
+      measure();
+      window.clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(measure, 180);
+    };
+    window.addEventListener('resize', onResize, { passive: true });
+    window.addEventListener('load', measure);
+    const settle = window.setTimeout(measure, 400);
+
     const tick = () => {
       raf = requestAnimationFrame(tick);
       const vh = window.innerHeight;
+      const scrollY = window.scrollY;
+
       let current = 0;
       let best = Infinity;
 
-      actRefs.current.forEach((el, i) => {
-        if (!el) return;
-        const body = el.querySelector<HTMLElement>('.act-body');
-        if (!body) return;
-
-        const r = el.getBoundingClientRect();
+      for (let i = 0; i < beats.length; i++) {
+        const { body, kids, heading, top, height } = beats[i];
         // 0 as the beat enters the viewport, 1 as it leaves.
-        const p = (vh - r.top) / (r.height + vh);
+        const p = (vh - (top - scrollY)) / (height + vh);
 
-        const fadeIn = Math.min(1, Math.max(0, (p - 0.10) / 0.16));
-        const fadeOut = 1 - Math.min(1, Math.max(0, (p - 0.62) / 0.18));
-        const o = reduced ? 1 : Math.min(fadeIn, fadeOut);
+        // The beat as a whole only ever fades out; the entrance is carried by
+        // the children, staggered, so lines arrive rather than the block
+        // appearing all at once.
+        const exit = 1 - Math.min(1, Math.max(0, (p - 0.62) / 0.18));
+        const enter = Math.min(1, Math.max(0, (p - 0.08) / 0.30));
 
-        body.style.opacity = String(o);
-        body.style.transform = reduced ? '' : `translate3d(0, ${(0.42 - p) * 54}px, 0)`;
+        body.style.opacity = String(reduced ? 1 : exit);
+        body.style.transform = reduced ? '' : `translate3d(0, ${(0.42 - p) * 34}px, 0)`;
+
+        if (!reduced) {
+          for (let k = 0; k < kids.length; k++) {
+            const raw = (enter - k * 0.065) / 0.34;
+            const e = Math.min(1, Math.max(0, raw));
+            const eased = e * e * (3 - 2 * e);
+            const kid = kids[k];
+            if (kid === heading) {
+              kid.style.setProperty('--w', String(eased));
+            } else {
+              kid.style.opacity = String(eased);
+              kid.style.transform = `translate3d(0, ${(1 - eased) * 26}px, 0)`;
+            }
+          }
+        }
 
         const d = Math.abs(p - 0.45);
         if (d < best) { best = d; current = i; }
-      });
+      }
 
       setActive((a) => (a === current ? a : current));
 
-      const host = scrollRef.current;
+      const f = Math.min(1, Math.max(0, (scrollY - hostTop) / hostSpan));
+      progressRef.current = f;
       const meter = meterRef.current;
-      if (host && meter) {
-        const total = host.scrollHeight - vh;
-        const y = -host.getBoundingClientRect().top;
-        const f = total > 0 ? Math.min(1, Math.max(0, y / total)) : 0;
-        meter.style.transform = `scaleY(${f})`;
-      }
+      if (meter) meter.style.transform = `scaleY(${f})`;
     };
 
     raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
+    return () => {
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+      window.removeEventListener('resize', onResize);
+      window.removeEventListener('load', measure);
+      window.clearTimeout(resizeTimer);
+      window.clearTimeout(settle);
+    };
   }, []);
 
   return (
     <div className="journey" ref={scrollRef}>
-      <JourneyCanvas scrollRef={scrollRef} onReady={onReady} />
+      <JourneyCanvas progressRef={progressRef} onReady={onReady} />
 
       <div className="rail-index" aria-hidden>
         {journeyActs.map((a, i) => (
@@ -101,30 +174,30 @@ export function Journey() {
         return (
           <section
             key={act.index}
-            className={`act${isHero ? ' act--hero' : ''}`}
+            className={`act${isHero ? ' act--hero' : ''}${i === journeyActs.length - 1 ? ' act--last' : ''}`}
             data-side={place.side}
             data-align={place.align}
             ref={(el) => { actRefs.current[i] = el; }}
             aria-labelledby={`act-${act.index}`}
           >
             <div className="act-pin">
-              <div className="act-body" style={{ opacity: isHero ? 1 : 0 }}>
+              <div className="act-body" style={{ opacity: 1 }}>
                 <div className="act-index mono">
                   <span>{act.index}</span>
                   <span className="bar" aria-hidden />
                   <span>{act.label}</span>
                 </div>
 
-                <h2
-                  id={`act-${act.index}`}
-                  className="act-heading"
-                  style={isHero ? undefined : undefined}
-                >
-                  {act.heading}
+                <h2 id={`act-${act.index}`} className="act-heading">
+                  {isHero ? act.heading : <span className="mark">{act.heading}</span>}
                 </h2>
 
+                {act.subheading ? (
+                  <p className="act-subheading">{act.subheading}</p>
+                ) : null}
+
                 {act.body.map((para, k) => (
-                  <p key={k} className={isHero && k === 0 ? 'lede' : undefined}>{para}</p>
+                  <p key={k}>{para}</p>
                 ))}
 
                 {act.readout ? (

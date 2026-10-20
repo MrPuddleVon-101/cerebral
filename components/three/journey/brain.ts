@@ -168,10 +168,11 @@ function foldAt(p: THREE.Vector3): number {
   const qy = p.y + wz * 0.26;
   const qz = p.z + wz * 0.42;
 
-  const big = ridged(qx * 4.6, qy * 4.0, qz * 3.2);
-  const mid = ridged(qx * 9.7 + 31.7, qy * 8.8, qz * 7.1 - 12.3);
+  const big = ridged(qx * 3.7, qy * 3.3, qz * 2.6);
+  const mid = ridged(qx * 7.6 + 31.7, qy * 7.0, qz * 5.6 - 12.3);
+  const fine = ridged(qx * 15.1 - 5.2, qy * 14.0 + 9.4, qz * 11.3);
 
-  const r = clamp01(big * 0.74 + mid * 0.26);
+  const r = clamp01(big * 0.62 + mid * 0.27 + fine * 0.11);
   // Broad crowns, narrow valleys.
   return clamp01(Math.pow(r, 0.55));
 }
@@ -194,16 +195,72 @@ function cerebralSurface(
   const tmp = temporalSulcus(out, dir.x);
   const major = Math.min(1, syl + cen * 0.85 + tmp * 0.7);
 
-  out.addScaledVector(n, -0.140 * syl - 0.105 * cen - 0.068 * tmp);
+  out.addScaledVector(n, -0.195 * syl - 0.150 * cen - 0.100 * tmp);
 
   const f = foldAt(out);
   // Folding flattens out inside the major fissures.
-  out.addScaledVector(n, (f - 0.62) * 0.125 * (1 - major * 0.72));
+  out.addScaledVector(n, (f - 0.62) * 0.205 * (1 - major * 0.45));
 
   // Sulci sit in their own shadow; the named fissures sit deepest of all.
-  if (foldOut) foldOut.v = clamp01(f * (1 - major * 0.70));
+  if (foldOut) foldOut.v = clamp01(f * (1 - major * 0.62));
   return out;
 }
+
+/**
+ * Cerebellar surface: two lateral lobes either side of a midline vermis,
+ * wrapped in the fine horizontal folia that distinguish it from cortex.
+ * Returned in cerebellum-local space.
+ */
+function cerebellarSurface(
+  dir: THREE.Vector3,
+  out: THREE.Vector3,
+  foliaOut?: { v: number },
+): THREE.Vector3 {
+  out.set(dir.x * 0.395, dir.y * 0.190, dir.z * 0.255);
+
+  // Lateral lobes swell outward and hang slightly lower than the vermis.
+  const lobe = smoothstep(0.22, 0.90, Math.abs(dir.x));
+  out.x *= 1 + 0.22 * lobe;
+  out.y -= 0.050 * lobe;
+
+  _cn.set(out.x / 0.395, out.y / 0.190, out.z / 0.255).normalize();
+
+  // Vermis: a shallow groove down the midline separating the lobes.
+  const vermis = (1 - smoothstep(0.02, 0.16, Math.abs(dir.x))) * smoothstep(-0.45, 0.35, dir.z);
+  out.addScaledVector(_cn, -0.030 * vermis);
+
+  // Folia: noise stretched hard in Y reads as tight horizontal banding.
+  const folia = Math.pow(ridged(out.x * 6.5, out.y * 58.0, out.z * 6.5), 0.5);
+  out.addScaledVector(_cn, (folia - 0.60) * 0.055 * (1 - vermis * 0.6));
+
+  if (foliaOut) foliaOut.v = clamp01(folia * (1 - vermis * 0.5));
+  return out;
+}
+
+/** Outward normal of the cerebellar surface, by the same central difference. */
+function cerebellarNormal(dir: THREE.Vector3, at: THREE.Vector3, out: THREE.Vector3): void {
+  const ref = Math.abs(dir.y) > 0.95 ? _ALT : _UP;
+  _ct1.crossVectors(dir, ref).normalize();
+  _ct2.crossVectors(dir, _ct1).normalize();
+  const eps = 0.009;
+  _cd1.copy(dir).addScaledVector(_ct1, eps).normalize();
+  _cd2.copy(dir).addScaledVector(_ct2, eps).normalize();
+  cerebellarSurface(_cd1, _cp1);
+  cerebellarSurface(_cd2, _cp2);
+  _cp1.sub(at);
+  _cp2.sub(at);
+  out.crossVectors(_cp1, _cp2).normalize();
+  if (out.dot(at) < 0) out.negate();
+  if (!Number.isFinite(out.x)) out.copy(at).normalize();
+}
+
+const _cn = new THREE.Vector3();
+const _ct1 = new THREE.Vector3();
+const _ct2 = new THREE.Vector3();
+const _cd1 = new THREE.Vector3();
+const _cd2 = new THREE.Vector3();
+const _cp1 = new THREE.Vector3();
+const _cp2 = new THREE.Vector3();
 
 const _n = new THREE.Vector3();
 const _t1 = new THREE.Vector3();
@@ -262,8 +319,12 @@ export function buildBrain(targetCount: number): BrainCloud {
   let w = 0;
 
   // ---- Cerebrum -----------------------------------------------------------
-  for (let i = 0; i < nCerebrum; i++) {
-    fibonacciDir(i, nCerebrum, dir);
+  // Candidates are over-generated and then thinned by fold depth, so gyral
+  // crowns stay dense and sulci empty out.
+  const CAND = Math.ceil(nCerebrum * 1.62);
+  let placed = 0;
+  for (let i = 0; i < CAND && placed < nCerebrum; i++) {
+    fibonacciDir(i, CAND, dir);
     // Jitter so the fibonacci spiral never reads as a visible pattern.
     dir.x += (hash1(i * 3 + 1) - 0.5) * 0.012;
     dir.y += (hash1(i * 3 + 2) - 0.5) * 0.012;
@@ -271,7 +332,13 @@ export function buildBrain(targetCount: number): BrainCloud {
     dir.normalize();
 
     cerebralSurface(dir, p, foldOut);
+
+    // Keep 30% of points in the deepest sulci, all of them on the crowns.
+    const keep = 0.30 + 0.70 * Math.pow(foldOut.v, 1.15);
+    if (hash1(i * 977 + 19) > keep) continue;
+
     cerebralNormal(dir, p, nrm);
+    placed++;
 
     // A fifth of the points sit just beneath the surface so the cloud reads as
     // a volume rather than a hollow shell when it rotates.
@@ -294,24 +361,18 @@ export function buildBrain(targetCount: number): BrainCloud {
   }
 
   // ---- Cerebellum ---------------------------------------------------------
-  // Tucked beneath the occipital lobe, with fine horizontal folia.
-  const cbCenter = new THREE.Vector3(0, -0.50, -0.78);
+  // Tucked under the occipital lobe, which overlaps it from most angles.
+  const cbCenter = new THREE.Vector3(0, -0.47, -0.71);
+  const foliaOut = { v: 0 };
   for (let i = 0; i < nCerebellum; i++) {
     fibonacciDir(i, nCerebellum, dir);
-    dir.x += (hash1(i * 5 + 101) - 0.5) * 0.03;
-    dir.y += (hash1(i * 5 + 102) - 0.5) * 0.03;
-    dir.z += (hash1(i * 5 + 103) - 0.5) * 0.03;
+    dir.x += (hash1(i * 5 + 101) - 0.5) * 0.02;
+    dir.y += (hash1(i * 5 + 102) - 0.5) * 0.02;
+    dir.z += (hash1(i * 5 + 103) - 0.5) * 0.02;
     dir.normalize();
 
-    p.set(dir.x * 0.43, dir.y * 0.215, dir.z * 0.28);
-    // Two lateral lobes with a midline vermis between them.
-    p.x *= 1 + 0.20 * smoothstep(0.25, 0.9, Math.abs(dir.x));
-    p.y -= 0.055 * smoothstep(0.30, 1.0, Math.abs(dir.x));
-
-    nrm.set(p.x / 0.43, p.y / 0.215, p.z / 0.28).normalize();
-    // Folia: noise stretched hard in Y reads as tight horizontal banding.
-    const folia = Math.pow(ridged(p.x * 5.5, p.y * 42.0, p.z * 5.5), 0.6);
-    p.addScaledVector(nrm, (folia - 0.6) * 0.042);
+    cerebellarSurface(dir, p, foliaOut);
+    cerebellarNormal(dir, p, nrm);
     p.add(cbCenter);
 
     let d = 1;
@@ -327,22 +388,38 @@ export function buildBrain(targetCount: number): BrainCloud {
     normals[w * 3 + 1] = nrm.y;
     normals[w * 3 + 2] = nrm.z;
     seed[w] = hash1(i * 37 + 71);
-    fold[w] = clamp01(folia * 0.62 + 0.02);
-    depth[w] = d;
+    // Held a shade under the cortex so it never out-reads the cerebrum.
+    fold[w] = clamp01(foliaOut.v * 0.72 + 0.04);
+    depth[w] = d * 0.92;
     w++;
   }
 
   // ---- Brainstem ----------------------------------------------------------
-  // Tapered column dropping from the midbrain down and slightly forward.
+  // Midbrain, then the pons bulging forward, then the medulla tapering away.
+  // The previous version was a single fat cylinder dropped straight down, which
+  // read as a foreign object rather than as anatomy.
   for (let i = 0; i < nStem; i++) {
-    const t = i / Math.max(1, nStem - 1);
-    const ang = hash1(i * 11 + 401) * Math.PI * 2;
-    const rad = (0.175 - 0.070 * t) * (0.74 + hash1(i * 11 + 403) * 0.26);
-    const y = -0.36 - t * 0.72;
-    const z = -0.48 + t * 0.20;
+    const t = hash1(i * 11 + 401);                    // 0 at the midbrain, 1 at the medulla
+    const ang = hash1(i * 11 + 409) * Math.PI * 2;
 
-    p.set(Math.cos(ang) * rad, y, z + Math.sin(ang) * rad * 0.9);
-    nrm.set(Math.cos(ang), 0.18, Math.sin(ang)).normalize();
+    // Pons: a forward bulge around the upper third.
+    const pons = Math.exp(-Math.pow((t - 0.40) / 0.22, 2));
+
+    const rad = (0.098 + 0.052 * pons - 0.040 * smoothstep(0.50, 1.0, t))
+              * (0.86 + hash1(i * 11 + 403) * 0.20);
+
+    const cy = -0.30 - t * 0.58;
+    const cz = -0.30 + 0.085 * pons + 0.055 * t;
+
+    // Slightly wider than deep, as the stem is in cross-section.
+    const px = Math.cos(ang) * rad * 1.16;
+    const pz = cz + Math.sin(ang) * rad * 0.88;
+    p.set(px, cy, pz);
+
+    // Fine longitudinal grain so it does not read as moulded plastic.
+    nrm.set(Math.cos(ang), 0.10, Math.sin(ang)).normalize();
+    const grain = ridged(px * 16.0, cy * 5.0, pz * 16.0);
+    p.addScaledVector(nrm, (grain - 0.55) * 0.016);
 
     positions[w * 3] = p.x;
     positions[w * 3 + 1] = p.y;
@@ -351,8 +428,9 @@ export function buildBrain(targetCount: number): BrainCloud {
     normals[w * 3 + 1] = nrm.y;
     normals[w * 3 + 2] = nrm.z;
     seed[w] = hash1(i * 41 + 131);
-    fold[w] = 0.50 + hash1(i * 13 + 405) * 0.20;
-    depth[w] = 0.94;
+    // Darker than cortex: the stem is smooth and sits in shadow under the lobes.
+    fold[w] = 0.34 + grain * 0.24;
+    depth[w] = 0.90;
     w++;
   }
 
@@ -368,6 +446,20 @@ export function buildBrain(targetCount: number): BrainCloud {
     scatter[i * 3 + 2] = Math.sin(a) * sx * r;
   }
 
+  // Rejection sampling can fall a little short of the target; report what was
+  // actually written rather than leaving a tail of zeroed points at the origin.
+  const written = w;
+  if (written < count) {
+    return {
+      positions: positions.subarray(0, written * 3),
+      normals: normals.subarray(0, written * 3),
+      scatter: scatter.subarray(0, written * 3),
+      seed: seed.subarray(0, written),
+      fold: fold.subarray(0, written),
+      depth: depth.subarray(0, written),
+      count: written,
+    };
+  }
   return { positions, normals, scatter, seed, fold, depth, count };
 }
 

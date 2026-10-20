@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 import { PageHeader } from '@/components/site/PageHeader';
 import { PageShell } from '@/components/site/PageShell';
-import { Caveat, SectionLabel } from '@/components/site/ui';
+import { Caveat, PlannedNote, SectionLabel } from '@/components/site/ui';
 
 export const metadata: Metadata = {
   title: 'Adoption',
@@ -37,10 +37,10 @@ export default function AdoptionPage() {
         lede="Cerebral is not only a signal-processing project. A system can clear every technical bar and still fail, because the setup is tedious, the device is visible, the data feels sensitive, or the value does not justify the routine."
       />
 
-      <div className="shell" style={{ paddingBottom: 'clamp(50px, 8vw, 110px)' }}>
+      <div className="shell" style={{ paddingBottom: 'clamp(36px, 5vw, 72px)' }}>
         <hr className="rule" />
 
-        <section style={{ paddingBlock: 'clamp(40px, 5.5vw, 80px)' }}>
+        <section style={{ paddingBlock: 'clamp(30px, 4vw, 58px)' }}>
           <SectionLabel index="01">Dimensions under consideration</SectionLabel>
           <div className="rows">
             {DIMENSIONS.map(([k, d]) => (
@@ -54,7 +54,7 @@ export default function AdoptionPage() {
 
         <hr className="rule" />
 
-        <section style={{ paddingBlock: 'clamp(40px, 5.5vw, 80px)' }}>
+        <section style={{ paddingBlock: 'clamp(30px, 4vw, 58px)' }}>
           <SectionLabel index="02">Technical-to-adoption bridge</SectionLabel>
           <p className="lede" style={{ marginBottom: 'clamp(22px, 3vw, 34px)' }}>
             The point of running the technical study first is that the adoption study can then ask
@@ -77,17 +77,13 @@ export default function AdoptionPage() {
 
         <hr className="rule" />
 
-        <section style={{ paddingBlock: 'clamp(40px, 5.5vw, 80px)' }}>
+        <section style={{ paddingBlock: 'clamp(30px, 4vw, 58px)' }}>
           <SectionLabel index="03">Survey dashboard</SectionLabel>
-          <div className="empty mono">
-            <p style={{ color: 'var(--bone-70)', margin: 0 }}>Reserved.</p>
-            <p className="dimmer" style={{ textTransform: 'none', letterSpacing: '0.03em', marginTop: 14, marginBottom: 0, maxWidth: '58ch' }}>
-              When data exists, this becomes a dashboard reporting sample size, participant
-              characteristics, exact question wording, conditions, descriptive results, inferential
-              statistics and limitations — in aggregate only. Participant-level data will not be
-              published.
-            </p>
-          </div>
+          <PlannedNote>
+            A dashboard reporting sample size, participant characteristics, question wording,
+            conditions, results, statistics and limitations, in aggregate only. Participant-level
+            data will not be published.
+          </PlannedNote>
           <p style={{ marginTop: 'clamp(26px, 3.4vw, 40px)' }}>
             <Link className="link mono" href="/research/adoption-of-ear-worn-neurotech/">
               Study 02 design <span className="arrow" aria-hidden>→</span>

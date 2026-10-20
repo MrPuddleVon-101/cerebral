@@ -1,23 +1,47 @@
 import Link from 'next/link';
 
+import { publications } from '@/content/publications';
 import { site } from '@/content/site';
 
 export function Footer() {
+  // Sections with nothing in them yet are left out of the footer rather than
+  // advertised as empty. The routes stay live so links elsewhere keep working.
+  const footerNav = site.footerNav.filter(
+    (item) => !(item.href === '/publications/' && publications.length === 0),
+  );
+
   return (
-    <footer style={{ position: 'relative', zIndex: 2, background: 'var(--void)', marginTop: 'clamp(80px, 12vw, 180px)' }}>
+    <footer style={{ position: 'relative', zIndex: 2, background: 'var(--void)', marginTop: 'clamp(36px, 5vw, 76px)' }}>
       <hr className="rule" />
-      <div className="shell" style={{ paddingBlock: 'clamp(40px, 6vw, 80px)' }}>
+
+      {/* The contact call sits here rather than as its own section: it was
+          costing a full screen of empty page above the footer. */}
+      <div className="shell footer-cta">
+        <div>
+          <p className="mono dimmer" style={{ marginBottom: 14 }}>Collaborate</p>
+          <h2 className="footer-cta-head">Most of this is unfinished, which is the interesting part.</h2>
+        </div>
+        <div className="footer-cta-side">
+          <p className="dim">
+            If you work on ear-EEG, biosignal separation, low-channel decoding, wearable
+            electronics or technology adoption, or you think something here is wrong, that is a
+            useful conversation.
+          </p>
+          <Link className="link mono" href="/contact/">
+            Get in touch <span className="arrow" aria-hidden>→</span>
+          </Link>
+        </div>
+      </div>
+
+      <hr className="rule" />
+      <div className="shell" style={{ paddingBlock: 'clamp(36px, 5vw, 68px)' }}>
         <div
-          style={{
-            display: 'grid',
-            gap: 'clamp(32px, 5vw, 72px)',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
-          }}
+          className="footer-cols"
         >
           <div className="stack-s">
             <p className="mono dimmer">Sections</p>
-            <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'grid', gap: 7 }}>
-              {site.footerNav.map((item) => (
+            <ul className="footer-sections">
+              {footerNav.map((item) => (
                 <li key={item.href}>
                   <Link className="link-muted" href={item.href} style={{ borderBottom: 0 }}>
                     {item.label}
@@ -29,7 +53,7 @@ export function Footer() {
 
           <div className="stack-s">
             <p className="mono dimmer">Elsewhere</p>
-            <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'grid', gap: 7 }}>
+            <ul className="footer-list">
               {site.links.map((l) => (
                 <li key={l.label}>
                   {l.href ? (
@@ -60,7 +84,7 @@ export function Footer() {
           </div>
         </div>
 
-        <hr className="rule" style={{ marginBlock: 'clamp(32px, 4vw, 56px)' }} />
+        <hr className="rule" style={{ marginBlock: 'clamp(24px, 3vw, 38px)' }} />
 
         <div
           className="mono dimmer"

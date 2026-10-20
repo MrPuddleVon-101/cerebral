@@ -153,6 +153,8 @@ export interface JourneyAct {
   index: string;
   label: string;
   heading: string;
+  /** Prominent line under the heading, set larger than the body copy. */
+  subheading?: string;
   body: string[];
   /** Small technical annotation rendered in mono beside the act. */
   readout?: { k: string; v: string }[];

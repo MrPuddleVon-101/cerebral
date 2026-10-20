@@ -20,10 +20,10 @@ export default function UpdatesPage() {
         lede="Short and dated. Posted when there is something to say rather than on a schedule, and allowed to record dead ends — a log that only contains progress is not a log."
       />
 
-      <div className="shell" style={{ paddingBottom: 'clamp(50px, 8vw, 110px)' }}>
+      <div className="shell" style={{ paddingBottom: 'clamp(36px, 5vw, 72px)' }}>
         <hr className="rule" />
         {updates.map((u) => (
-          <article key={u.date} style={{ paddingBlock: 'clamp(34px, 4.5vw, 66px)', borderBottom: '1px solid var(--rule)' }}>
+          <article key={u.date} style={{ paddingBlock: 'clamp(26px, 3.4vw, 48px)', borderBottom: '1px solid var(--rule)' }}>
             <div className="mono dimmer" style={{ marginBottom: 16 }}>
               {u.date} <span className="faint">·</span> {u.category.replace('-', ' ')}
             </div>

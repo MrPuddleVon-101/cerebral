@@ -4,48 +4,64 @@ import Link from 'next/link';
 import { useMemo, useState } from 'react';
 
 import { StatusBadge } from '@/components/site/ui';
-import type { Study } from '@/lib/types';
+import type { Status, Study } from '@/lib/types';
 
 /**
- * Filterable research index (PRD §5.1, FR-06). Filtering is client-side over a
- * static list — there is no search backend and does not need to be one until
- * the library is much larger.
+ * Filterable research index (PRD §5.1, FR-06).
+ *
+ * Deliberately five filters rather than one per tag. With three outputs in the
+ * library, a tag-per-filter bar advertised far more structure than there is
+ * content; the full tag vocabulary still lives on each entry and the bar can
+ * grow back when the library justifies it.
  */
-export function ResearchIndex({ studies, tags }: { studies: Study[]; tags: string[] }) {
+const ACTIVE: Status[] = ['in-progress', 'analysis', 'manuscript', 'submitted'];
+const UPCOMING: Status[] = ['planned', 'exploratory'];
+
+const FILTERS: { id: string; label: string; match: (s: Study) => boolean }[] = [
+  { id: 'active',    label: 'Active',    match: (s) => ACTIVE.includes(s.status) },
+  { id: 'planned',   label: 'Planned',   match: (s) => UPCOMING.includes(s.status) },
+  { id: 'technical', label: 'Technical', match: (s) => s.type === 'technical' },
+  { id: 'adoption',  label: 'Adoption',  match: (s) => s.type === 'adoption' },
+];
+
+export function ResearchIndex({ studies }: { studies: Study[] }) {
   const [active, setActive] = useState<string | null>(null);
 
-  const shown = useMemo(
-    () => (active ? studies.filter((s) => s.tags.includes(active)) : studies),
-    [studies, active],
-  );
+  const shown = useMemo(() => {
+    const f = FILTERS.find((x) => x.id === active);
+    return f ? studies.filter(f.match) : studies;
+  }, [studies, active]);
+
+  const activeLabel = FILTERS.find((f) => f.id === active)?.label;
 
   return (
     <>
       <div
         className="mono"
-        style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 'clamp(26px, 3.4vw, 44px)' }}
+        style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 'clamp(24px, 3vw, 40px)' }}
       >
         <button type="button" className="filter" data-on={active === null} onClick={() => setActive(null)}>
           All ({studies.length})
         </button>
-        {tags.map((t) => {
-          const n = studies.filter((s) => s.tags.includes(t)).length;
+        {FILTERS.map((f) => {
+          const n = studies.filter(f.match).length;
+          if (n === 0) return null;
           return (
             <button
-              key={t}
+              key={f.id}
               type="button"
               className="filter"
-              data-on={active === t}
-              onClick={() => setActive(active === t ? null : t)}
+              data-on={active === f.id}
+              onClick={() => setActive(active === f.id ? null : f.id)}
             >
-              {t} ({n})
+              {f.label} ({n})
             </button>
           );
         })}
       </div>
 
       {shown.length === 0 ? (
-        <div className="empty mono">Nothing tagged {active} yet.</div>
+        <div className="empty mono">Nothing under {activeLabel} yet.</div>
       ) : (
         <div className="rows">
           {shown.map((s) => (

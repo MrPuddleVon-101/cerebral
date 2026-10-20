@@ -21,7 +21,7 @@ export default function RoadmapPage() {
         lede="Not a funding timeline. Each stage exists because the previous one produced a reason for it, and the later stages are explicitly conditional — a technically interesting result is not a product, and a product is not a company."
       />
 
-      <div className="shell" style={{ paddingBottom: 'clamp(50px, 8vw, 110px)' }}>
+      <div className="shell" style={{ paddingBottom: 'clamp(36px, 5vw, 72px)' }}>
         <hr className="rule" />
         <ol className="rows" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
           {milestones.map((m) => (

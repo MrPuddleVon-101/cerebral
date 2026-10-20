@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 
 import { PageHeader } from '@/components/site/PageHeader';
 import { PageShell } from '@/components/site/PageShell';
-import { Caveat, SectionLabel, StatusBadge } from '@/components/site/ui';
+import { Caveat, PlannedNote, SectionLabel, StatusBadge } from '@/components/site/ui';
 import { prototypes } from '@/content/prototypes';
 
 export const metadata: Metadata = {
@@ -22,10 +22,10 @@ export default function BuildPage() {
         meta={<Caveat>Early prototypes, when they exist, will be research devices. Not medical products, and not diagnostic tools.</Caveat>}
       />
 
-      <div className="shell" style={{ paddingBottom: 'clamp(50px, 8vw, 110px)' }}>
+      <div className="shell" style={{ paddingBottom: 'clamp(36px, 5vw, 72px)' }}>
         <hr className="rule" />
 
-        <section style={{ paddingBlock: 'clamp(40px, 5.5vw, 80px)' }}>
+        <section style={{ paddingBlock: 'clamp(30px, 4vw, 58px)' }}>
           <SectionLabel index="01">Why around-ear</SectionLabel>
           <div className="rows">
             {[
@@ -44,7 +44,7 @@ export default function BuildPage() {
 
         <hr className="rule" />
 
-        <section style={{ paddingBlock: 'clamp(40px, 5.5vw, 80px)' }}>
+        <section style={{ paddingBlock: 'clamp(30px, 4vw, 58px)' }}>
           <SectionLabel index="02">Prototype log</SectionLabel>
           {prototypes.map((p) => (
             <div key={p.slug} style={{ marginBottom: 'clamp(28px, 4vw, 48px)' }}>
@@ -76,16 +76,13 @@ export default function BuildPage() {
 
         <hr className="rule" />
 
-        <section style={{ paddingBlock: 'clamp(40px, 5.5vw, 80px)' }}>
+        <section style={{ paddingBlock: 'clamp(30px, 4vw, 58px)' }}>
           <SectionLabel index="03">Industrial design</SectionLabel>
-          <div className="empty mono">
-            <p style={{ color: 'var(--bone-70)', margin: 0 }}>No renders yet.</p>
-            <p className="dimmer" style={{ textTransform: 'none', letterSpacing: '0.03em', marginTop: 14, marginBottom: 0, maxWidth: '58ch' }}>
-              CAD and render galleries will be versioned (V0, V1, …) with old versions preserved, so
-              this page becomes an engineering history rather than a showcase of the latest shape.
-              The hook geometry on the homepage is an illustration of the constraint, not a design.
-            </p>
-          </div>
+          <PlannedNote>
+            Versioned CAD and renders, with old versions preserved so this becomes an engineering
+            history rather than a showcase of the latest shape. The earbud geometry on the homepage
+            is an illustration of the constraint, not a design.
+          </PlannedNote>
         </section>
       </div>
     </PageShell>

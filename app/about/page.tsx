@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 
 import { PageHeader } from '@/components/site/PageHeader';
 import { PageShell } from '@/components/site/PageShell';
@@ -21,10 +22,10 @@ export default function AboutPage() {
         lede={site.shortDescription}
       />
 
-      <div className="shell" style={{ paddingBottom: 'clamp(50px, 8vw, 110px)' }}>
+      <div className="shell" style={{ paddingBottom: 'clamp(36px, 5vw, 72px)' }}>
         <hr className="rule" />
 
-        <section style={{ paddingBlock: 'clamp(40px, 5.5vw, 80px)' }}>
+        <section style={{ paddingBlock: 'clamp(30px, 4vw, 58px)' }}>
           <SectionLabel index="01">Mission</SectionLabel>
           <p className="lede">
             Find out whether non-invasive neurotechnology can become small, intelligent and practical
@@ -34,7 +35,7 @@ export default function AboutPage() {
 
         <hr className="rule" />
 
-        <section style={{ paddingBlock: 'clamp(40px, 5.5vw, 80px)' }}>
+        <section style={{ paddingBlock: 'clamp(30px, 4vw, 58px)' }}>
           <SectionLabel index="02">Research philosophy</SectionLabel>
           <div className="rows">
             {[
@@ -54,19 +55,36 @@ export default function AboutPage() {
 
         <hr className="rule" />
 
-        <section style={{ paddingBlock: 'clamp(40px, 5.5vw, 80px)' }}>
+        <section style={{ paddingBlock: 'clamp(30px, 4vw, 58px)' }}>
           <SectionLabel index="03">The interdisciplinary chain</SectionLabel>
-          <p className="dim" style={{ maxWidth: '64ch' }}>
+          <p className="dim" style={{ maxWidth: '64ch', marginBottom: 'clamp(24px, 3.2vw, 40px)' }}>
             Neural engineering leads to AI, which leads to engineering, which leads to adoption, which
             only then leads to any question about a product. Each link has to be justified by the one
             before it. Cerebral is deliberately structured so a result at any stage can invalidate the
             stages after it, rather than being routed around.
           </p>
+          <div className="rows">
+            {[
+              { n: 'I',   t: 'Biosignals',  href: '/technology/', d: 'What can compact, non-invasive sensors around the ear actually pick up, and how much of it is muscle rather than cortex?' },
+              { n: 'II',  t: 'AI decoding', href: '/technology/models/', d: 'Can signal processing and machine learning recover useful structure from a short, noisy, low-channel recording?' },
+              { n: 'III', t: 'Engineering', href: '/build/', d: 'How small and unobtrusive can the sensing system get before the performance cost stops being worth it?' },
+              { n: 'IV',  t: 'Adoption',    href: '/adoption/', d: 'At what point would someone outside a lab trust the thing, wear it daily, and pay for it?' },
+            ].map((x) => (
+              <Link className="row row-3" href={x.href} key={x.n}>
+                <span className="mono dimmer">{x.n}</span>
+                <span>
+                  <span style={{ display: 'block', fontSize: 'var(--step-1)', marginBottom: 8 }}>{x.t}</span>
+                  <span className="dim" style={{ maxWidth: '58ch', display: 'block' }}>{x.d}</span>
+                </span>
+                <span className="mono dimmer" style={{ justifySelf: 'start' }}>Open →</span>
+              </Link>
+            ))}
+          </div>
         </section>
 
         <hr className="rule" />
 
-        <section style={{ paddingBlock: 'clamp(40px, 5.5vw, 80px)' }}>
+        <section style={{ paddingBlock: 'clamp(30px, 4vw, 58px)' }}>
           <SectionLabel index="04">Who</SectionLabel>
           <dl className="defs mono">
             <div className="def"><dt>Project</dt><dd>{site.name}</dd></div>
@@ -78,7 +96,7 @@ export default function AboutPage() {
 
         <hr className="rule" />
 
-        <section style={{ paddingBlock: 'clamp(40px, 5.5vw, 80px)' }}>
+        <section style={{ paddingBlock: 'clamp(30px, 4vw, 58px)' }}>
           <SectionLabel index="05">What this site is not</SectionLabel>
           <div className="rows">
             {[
