@@ -110,6 +110,8 @@ export function AmbientField() {
       };
       resize();
       window.addEventListener('resize', resize, { passive: true });
+      // Catches the case where layout had not settled when the chunk ran.
+      const settle = window.setTimeout(resize, 120);
 
       let raf = 0;
       const start = performance.now();
@@ -123,6 +125,7 @@ export function AmbientField() {
 
       cleanup = () => {
         cancelAnimationFrame(raf);
+        window.clearTimeout(settle);
         window.removeEventListener('resize', resize);
         geo.dispose();
         (points.material as import('three').Material).dispose();

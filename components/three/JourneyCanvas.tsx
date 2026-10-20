@@ -19,17 +19,20 @@ export function JourneyCanvas({
   progressRef: React.RefObject<number>;
   onReady?: () => void;
 }) {
+  const wrapRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const handleRef = useRef<JourneyHandle | null>(null);
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    const wrap = wrapRef.current;
+    if (!canvas || !wrap) return;
 
     let disposed = false;
     let onResize: (() => void) | null = null;
     let onVisibility: (() => void) | null = null;
+    let ro: ResizeObserver | null = null;
 
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -49,6 +52,13 @@ export function JourneyCanvas({
         onResize = () => handle.resize();
         window.addEventListener('resize', onResize, { passive: true });
 
+        // Observe the container rather than measuring it once. On a fast load
+        // the engine chunk can execute before layout has settled, and a
+        // one-shot measurement then sizes the drawing buffer to 1x1 with
+        // nothing to correct it until the window happens to resize.
+        ro = new ResizeObserver(() => handle.resize());
+        ro.observe(wrap);
+
         onVisibility = () => handle.setPaused(document.hidden);
         document.addEventListener('visibilitychange', onVisibility);
       })
@@ -57,6 +67,7 @@ export function JourneyCanvas({
     return () => {
       disposed = true;
       if (onResize) window.removeEventListener('resize', onResize);
+      ro?.disconnect();
       if (onVisibility) document.removeEventListener('visibilitychange', onVisibility);
       handleRef.current?.dispose();
       handleRef.current = null;
@@ -67,6 +78,7 @@ export function JourneyCanvas({
 
   return (
     <div
+      ref={wrapRef}
       aria-hidden
       style={{
         position: 'fixed',
